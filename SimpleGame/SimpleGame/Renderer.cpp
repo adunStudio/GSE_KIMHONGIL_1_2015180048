@@ -27,6 +27,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	{
 		m_Initialized = true;
 	}
+
 }
 
 bool Renderer::IsInitialized()
@@ -81,7 +82,7 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 
 	// ShaderProgram ¿¡ attach!!
 	glAttachShader(ShaderProgram, ShaderObj);
-}
+} 
 
 bool Renderer::ReadFile(char* filename, std::string *target)
 {

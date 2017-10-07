@@ -10,12 +10,17 @@ but WITHOUT ANY WARRANTY.
 
 #include "stdafx.h"
 #include <iostream>
+#include <vector>
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
 #include "Renderer.h"
+#include "Locker.h"
+
+using namespace std;
 
 Renderer *g_Renderer = NULL;
+vector<Node*> nodes;
 
 void RenderScene(void)
 {
@@ -23,7 +28,13 @@ void RenderScene(void)
 	glClearColor(0.0f, 0.3f, 0.3f, 1.0f);
 
 	// Renderer Test
-	g_Renderer->DrawSolidRect(0, 0, 0, 4, 1, 0, 1, 1);
+	// g_Renderer->DrawSolidRect(0, 0, 0, 14, 1, 0, 1, 1);
+
+	for (auto node : nodes)
+		node->update();
+	
+	for (auto node : nodes)
+		node->render(*g_Renderer);
 
 	glutSwapBuffers();
 }
@@ -79,6 +90,9 @@ int main(int argc, char **argv)
 	glutKeyboardFunc(KeyInput);
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
+
+	nodes.push_back(new Locker(rand() % 100, rand() % 100, 0, 10, 1, 0, 0, 1));
+	nodes.push_back(new Locker(rand() % 100, rand() % 100, 0, 10, 0, 1, 0, 1));
 
 	glutMainLoop();
 
