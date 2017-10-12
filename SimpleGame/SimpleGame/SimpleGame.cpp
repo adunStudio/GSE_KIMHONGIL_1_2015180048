@@ -34,7 +34,7 @@ void RenderScene(void)
 		node->update();
 	
 	for (auto node : nodes)
-		node->render(*g_Renderer);
+		node->render(g_Renderer);
 
 	glutSwapBuffers();
 }
@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 
-	nodes.push_back(new Locker(rand() % 100, rand() % 100, 0, 10, 1, 0, 0, 1));
+	nodes.push_back(new Locker(rand() % 100, rand() % 100, 0, 30, 1, 0, 0, 1));
 	nodes.push_back(new Locker(rand() % 100, rand() % 100, 0, 10, 0, 1, 0, 1));
 
 	glutMainLoop();

@@ -7,6 +7,6 @@ public:
 	~Locker();
 
 	virtual void update();
-	virtual void render(Renderer& render);
+	virtual void render(Renderer* render);
 };
 

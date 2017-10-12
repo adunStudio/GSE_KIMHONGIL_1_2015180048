@@ -19,6 +19,6 @@ void Locker::update() {
 	y += (moveY / 5);
 };
 
-void Locker::render(Renderer& renderer) {
-	renderer.DrawSolidRect(x, y, z, size, r, g, b, a);
+void Locker::render(Renderer* renderer) {
+	renderer->DrawSolidRect(x, y, z, size, r, g, b, a);
 };
