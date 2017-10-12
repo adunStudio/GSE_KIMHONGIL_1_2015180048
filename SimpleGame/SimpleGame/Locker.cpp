@@ -8,15 +8,13 @@ Locker::Locker(float _x, float _y, float _z, float _size, float _r, float _g, fl
 
 Locker::~Locker()
 {
-
+	cout << "삭제되었습니다. \n";
 }
 
 void Locker::update() {
-	float moveX = rand() % 3 - 1;
-	float moveY = rand() % 3 - 1;
 
-	x += (moveX / 5);
-	y += (moveY / 5);
+	x += moveX;
+	y += moveY;
 };
 
 void Locker::render(Renderer* renderer) {

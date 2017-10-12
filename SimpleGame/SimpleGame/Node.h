@@ -13,11 +13,12 @@ protected:
 	float x, y, z;
 	float size;
 	float r, g, b, a;
+	float moveX, moveY;
 
 public:
 	Node();
 	Node(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a);
-	~Node();
+	virtual ~Node();
 
 	void setPositionX(float _x);
 	float getPositionX();
@@ -32,6 +33,11 @@ public:
 
 	void setSize(float _size);
 	float getSize();
+
+	void setMoveX(float _moveX);
+	float getMoveX();
+	void setMoveY(float _moveY);
+	float getMoveY();
 
 	void setColor(Color& color);
 	Color& getColor();

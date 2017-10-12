@@ -22,6 +22,8 @@ using namespace std;
 Renderer *g_Renderer = NULL;
 vector<Node*> nodes;
 
+bool downed = false;
+
 void RenderScene(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -46,7 +48,15 @@ void Idle(void)
 
 void MouseInput(int button, int state, int x, int y)
 {
-	RenderScene();
+	if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
+		downed = true;
+
+	if (downed && state == GLUT_UP && button == GLUT_LEFT_BUTTON)
+	{
+		nodes.push_back(new Locker(x - 250, (y - 250) * -1, 0, 10, 0, 1, 0, 1));
+		downed = false;
+	}
+
 }
 
 void KeyInput(unsigned char key, int x, int y)
