@@ -20,7 +20,7 @@ but WITHOUT ANY WARRANTY.
 using namespace std;
 
 Renderer *g_Renderer = NULL;
-vector<Node*> nodes;
+vector<Object*> objects;
 
 bool downed = false;
 
@@ -32,11 +32,11 @@ void RenderScene(void)
 	// Renderer Test
 	// g_Renderer->DrawSolidRect(0, 0, 0, 14, 1, 0, 1, 1);
 
-	for (auto node : nodes)
-		node->update();
+	for (auto object : objects)
+		object->update();
 	
-	for (auto node : nodes)
-		node->render(g_Renderer);
+	for (auto object : objects)
+		object->render(g_Renderer);
 
 	glutSwapBuffers();
 }
@@ -53,7 +53,7 @@ void MouseInput(int button, int state, int x, int y)
 
 	if (downed && state == GLUT_UP && button == GLUT_LEFT_BUTTON)
 	{
-		nodes.push_back(new Locker(x - 250, (y - 250) * -1, 0, 10, 0, 1, 0, 1));
+		objects.push_back(new Locker(x - 250, (y - 250) * -1, 0, 10, 0, 1, 0, 1));
 		downed = false;
 	}
 
@@ -101,8 +101,8 @@ int main(int argc, char **argv)
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 
-	nodes.push_back(new Locker(rand() % 100, rand() % 100, 0, 30, 1, 0, 0, 1));
-	nodes.push_back(new Locker(rand() % 100, rand() % 100, 0, 10, 0, 1, 0, 1));
+	objects.push_back(new Locker(rand() % 100, rand() % 100, 0, 30, 1, 0, 0, 1));
+	objects.push_back(new Locker(rand() % 100, rand() % 100, 0, 10, 0, 1, 0, 1));
 
 	glutMainLoop();
 

@@ -3,7 +3,14 @@
 
 
 Locker::Locker(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a)
-	: Node(_x, _y, _z, _size, _r, _g, _b, _a){}
+	: Object(_x, _y, _z, _size, _r, _g, _b, _a) 
+{
+	if (rand() % 2 == 0)
+		speedX *= -1;
+
+	if (rand() % 2 == 0)
+		speedY *= -1;
+}
 
 
 Locker::~Locker()
@@ -13,8 +20,8 @@ Locker::~Locker()
 
 void Locker::update() {
 
-	x += moveX;
-	y += moveY;
+	x += speedX;
+	y += speedY;
 };
 
 void Locker::render(Renderer* renderer) {
