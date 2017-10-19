@@ -5,21 +5,14 @@
 Object::Object() : x(0), y(0), z(0), size(0), r(0), g(0), b(0), a(0) {};
 
 Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a)
-	: x(_x), y(_y), z(_z), size(_size), r(_r), g(_g), b(_b), a(_a), speedX(rand() / (float)RAND_MAX * 0.3f), speedY(rand() / (float)RAND_MAX * 0.3f)
-{
-	
-}
+	: x(_x), y(_y), z(_z), size(_size), r(_r), g(_g), b(_b), a(_a), speedX(rand() / (float)RAND_MAX * 0.1f), speedY(rand() / (float)RAND_MAX * 0.1f) { }
 
 
 Object::~Object() { }
 
-void Object::setSize(float _size) {
-	size = _size;
-}
-
-float Object::getSize() {
-	return size;
-}
+/* Setter / Getter */
+void Object::setSize(float _size) { size = _size; }
+float Object::getSize() { return size; }
 
 void Object::setPositionX(float _x) { x = _x;  }
 float Object::getPositionX() { return x; }
@@ -32,8 +25,10 @@ float Object::getPositionZ() { return z; }
 
 void Object::setSpeedX(float _speedX) { speedX = _speedX;  }
 float Object::getSpeedX() { return speedX; }
+
 void Object::setSpeedY(float _speedY) { speedY = _speedY;  }
 float Object::getSpeedY() { return speedY; }
+
 
 void Object::setColor(Color& color)
 {
@@ -43,7 +38,8 @@ void Object::setColor(Color& color)
 	a = color.a;
 };
 
-Color& Object::getColor() {
+Color& Object::getColor()
+{
 	Color color = { r, g, b, a };
 	return color;
 }

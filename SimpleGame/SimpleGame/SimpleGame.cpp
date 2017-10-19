@@ -10,17 +10,15 @@ but WITHOUT ANY WARRANTY.
 
 #include "stdafx.h"
 #include <iostream>
-#include <vector>
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
 #include "Renderer.h"
-#include "Locker.h"
-
+#include "SceneMgr.h"
 using namespace std;
 
-Renderer *g_Renderer = NULL;
-vector<Object*> objects;
+Renderer* g_Renderer   = NULL;
+SceneMgr* sceneManager = NULL;
 
 bool downed = false;
 
@@ -32,11 +30,7 @@ void RenderScene(void)
 	// Renderer Test
 	// g_Renderer->DrawSolidRect(0, 0, 0, 14, 1, 0, 1, 1);
 
-	for (auto object : objects)
-		object->update();
-	
-	for (auto object : objects)
-		object->render(g_Renderer);
+	sceneManager->update();
 
 	glutSwapBuffers();
 }
@@ -48,14 +42,14 @@ void Idle(void)
 
 void MouseInput(int button, int state, int x, int y)
 {
-	if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
+	/*if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
 		downed = true;
 
 	if (downed && state == GLUT_UP && button == GLUT_LEFT_BUTTON)
 	{
 		objects.push_back(new Locker(x - 250, (y - 250) * -1, 0, 10, 0, 1, 0, 1));
 		downed = false;
-	}
+	}*/
 
 }
 
@@ -94,6 +88,7 @@ int main(int argc, char **argv)
 	{
 		std::cout << "Renderer could not be initialized.. \n";
 	}
+	sceneManager = new SceneMgr(g_Renderer);
 
 	glutDisplayFunc(RenderScene);
 	glutIdleFunc(Idle);
@@ -101,8 +96,6 @@ int main(int argc, char **argv)
 	glutMouseFunc(MouseInput);
 	glutSpecialFunc(SpecialKeyInput);
 
-	objects.push_back(new Locker(rand() % 100, rand() % 100, 0, 30, 1, 0, 0, 1));
-	objects.push_back(new Locker(rand() % 100, rand() % 100, 0, 10, 0, 1, 0, 1));
 
 	glutMainLoop();
 
