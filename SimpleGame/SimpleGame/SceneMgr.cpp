@@ -38,6 +38,13 @@ void SceneMgr::update()
 	for (int i = 0; i < objectCount; ++i)
 	{
 		objects[i]->update();
+	}
+}
+
+void SceneMgr::render()
+{
+	for (int i = 0; i < objectCount; ++i)
+	{
 		objects[i]->render(renderer);
 	}
 }

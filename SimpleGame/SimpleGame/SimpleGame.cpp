@@ -31,6 +31,7 @@ void RenderScene(void)
 	// g_Renderer->DrawSolidRect(0, 0, 0, 14, 1, 0, 1, 1);
 
 	sceneManager->update();
+	sceneManager->render();
 
 	glutSwapBuffers();
 }

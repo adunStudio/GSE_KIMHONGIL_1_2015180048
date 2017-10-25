@@ -19,5 +19,6 @@ public:
 	~SceneMgr();
 
 	void update();
+	void render();
 };
 
