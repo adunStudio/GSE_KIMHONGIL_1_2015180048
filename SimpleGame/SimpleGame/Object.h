@@ -14,6 +14,8 @@ protected:
 	float size;
 	float r, g, b, a;
 	float speedX, speedY;
+	float life = 0, lifeTime = 0;
+	bool dead = false;
 
 public:
 	Object();
@@ -42,9 +44,14 @@ public:
 	void setColor(Color& color);
 	Color& getColor();
 
-	virtual void update() = 0;
+	virtual void update(float elapsed) = 0;
 
 	virtual void render(Renderer* renderer) = 0;
 
+	bool intersect(Object* obj);
+
+	bool isDead();
+
+	void attacked(float damage);
 };
 

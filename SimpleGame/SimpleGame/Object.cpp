@@ -44,3 +44,23 @@ Color& Object::getColor()
 	return color;
 }
 
+bool Object::intersect(Object* obj)
+{
+	return (
+		x - size < obj->x + obj->size &&
+		x + size > obj->x - obj->size &&
+		y - size < obj->y + obj->size &&
+		y + size > obj->y - obj->size
+		);
+}
+
+bool Object::isDead()
+{
+	return dead;
+}
+
+void Object::attacked(float damage)
+{
+	life -= damage;
+}
+
