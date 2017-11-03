@@ -37,6 +37,11 @@ void SceneMgr::addBulletObject(float x, float y)
 	bullets.push_back(new Object(x, y, OBJECT_BULLET));
 }
 
+bool SceneMgr::collision(Object* obj1, Object* obj2)
+{
+	return obj1->intersect(obj2);
+}
+
 void SceneMgr::update()
 {
 	curTime = static_cast<float>(timeGetTime() * 0.001f);
@@ -53,7 +58,7 @@ void SceneMgr::update()
 	// 캐릭터 VS 빌딩
 	for (auto it = characters.begin(); it != characters.end();)
 	{
-		if (buildings.size() > 0 && (*it)->intersect(buildings[0]))
+		if (buildings.size() > 0 && collision((*it), buildings[0]))
 		{
 			// 빌딩 체력 깎기
 			buildings[0]->attacked((*it)->getLife());
@@ -77,7 +82,7 @@ void SceneMgr::update()
 		{
 			auto bullet = *it_b;
 
-			if (character->intersect(bullet))
+			if (collision(character, bullet))
 			{
 				// 캐릭터 체력 깎기 | 캐릭터 삭제
 				// TODO: 케릭터 체력(10)이 총알 체력(20)보다 작은데 ??

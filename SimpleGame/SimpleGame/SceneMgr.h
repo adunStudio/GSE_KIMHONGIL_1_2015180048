@@ -27,6 +27,8 @@ private:
 	void addBuildingObject(float x, float y);
 	void addBulletObject(float x, float y);
 
+	bool collision(Object* obj1, Object* obj2);
+
 	float curTime, prevTime;
 
 public:
@@ -35,7 +37,7 @@ public:
 
 	void update();
 	void render();
-
+	
 	void addCharacterObject(float x, float y);
 };
 
