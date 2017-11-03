@@ -15,6 +15,8 @@ Object::~Object()
 void Object::init()
 {
 	angle = rand() % 360;
+	lifeTime = 1000 + rand() % 1000;
+	std::cout << lifeTime << std::endl;
 
 	switch (type)
 	{
@@ -57,8 +59,8 @@ float Object::getPositionX() { return x; }
 void Object::setPositionY(float _y) { y = _y; }
 float Object::getPositionY() { return y; }
 
-float Object::getTime() { return lifeTime; }
-void Object::setTime(float _time) { lifeTime = _time; }
+float Object::getTime() { return elapsedTime; }
+void Object::setTime(float _time) { elapsedTime = _time; }
 
 float Object::getLife() { return life; }
 
@@ -84,19 +86,22 @@ void Object::attacked(float damage)
 	life -= damage;
 }
 
+bool Object::isDead()
+{
+	return lifeTime < 0;
+}
+
 void Object::update(float elapsed)
 {
-	lifeTime += elapsed;		
+	elapsedTime += elapsed;		
+	lifeTime -= elapsed;
 
 	if (x < -250 || x > 250)
 		speedX *= -1;
 	
-		
-
 	if (y < -250 || y > 250)
 		speedY *= -1;
 	
-
 	x += cos(angle) * speedX * 0.0001;
 	y += sin(angle) * speedY * 0.0001;
 }

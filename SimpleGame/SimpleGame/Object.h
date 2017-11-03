@@ -22,6 +22,7 @@ private:
 	float speedX, speedY;
 	float life;
 	float lifeTime = 0;
+	float elapsedTime = 0;
 	float angle;
 
 private:
@@ -47,6 +48,7 @@ public:
 
 	float getLife();
 
+	bool isDead();
 
 	void update(float elapsed);
 

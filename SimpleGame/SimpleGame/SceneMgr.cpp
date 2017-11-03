@@ -9,7 +9,6 @@ SceneMgr::SceneMgr(Renderer* _renderer) : renderer(_renderer), curTime(0), prevT
 	init();
 }
 
-
 SceneMgr::~SceneMgr()
 {
 }
@@ -112,6 +111,29 @@ void SceneMgr::update()
 		buildings[0]->setTime(buildings[0]->getTime() - 0.5);
 		addBulletObject(buildings[0]->getPositionX(), buildings[0]->getPositionY());
 	}
+
+	// 라이프 타임
+	for (auto it = characters.begin(); it != characters.end();)
+	{
+		if ((*it)->isDead())
+		{
+			delete *it;
+			it = characters.erase(it);
+		}
+		else
+			++it;
+	}
+
+	for (auto it = bullets.begin(); it != bullets.end();)
+	{
+		if ((*it)->isDead())
+		{
+			delete *it;
+			it = bullets.erase(it);
+		}
+		else
+			++it;
+	}
 }
 
 void SceneMgr::render()
@@ -124,5 +146,4 @@ void SceneMgr::render()
 
 	for (auto v : bullets)
 		v->render(renderer);
-	
 }
