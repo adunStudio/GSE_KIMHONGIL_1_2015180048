@@ -6,7 +6,7 @@ SceneMgr::SceneMgr(Renderer* _renderer) : renderer(_renderer), curTime(0), prevT
 {
 	prevTime = static_cast<float>(timeGetTime() * 0.001f);
 
-	initilize();
+	init();
 }
 
 
@@ -14,25 +14,27 @@ SceneMgr::~SceneMgr()
 {
 }
 
-void SceneMgr::initilize()
+void SceneMgr::init()
 {
-	for (int i = 0; i < MAX_OBJECTS_COUNT; ++i)
+	addBuildingObject(0, 0);
+}
+
+void SceneMgr::addBuildingObject(float x, float y)
+{
+	buildings.push_back(new Object(x, y, OBJECT_BUILDING));
+}
+
+void SceneMgr::addCharacterObject(float x, float y)
+{
+	if (characters.size() < MAX_CHARACTER_COUNT)
 	{
-		addObject();
+		characters.push_back(new Object(x, y, OBJECT_CHARACTER));
 	}
 }
 
-void SceneMgr::addObject()
+void SceneMgr::addBulletObject(float x, float y)
 {
-	if (objectCount >= MAX_OBJECTS_COUNT)
-	{
-		std::cout << "오브젝트 개수가 꽉 찼습니다." << std::endl;
-		return;
-	}
-
-	objects.push_back(new Locker(-200 + rand() % 400, -200 + rand() % 400, 0, 5, 1, 1, 1, 1));
-
-	objectCount = objects.size();
+	bullets.push_back(new Object(x, y, OBJECT_BULLET));
 }
 
 void SceneMgr::update()
@@ -41,39 +43,81 @@ void SceneMgr::update()
 	float elapsed = curTime - prevTime;
 	prevTime = curTime;
 
-	for (int i = 0; i < objectCount; ++i)
-	{
-		objects[i]->update(elapsed);
+	for (auto v : buildings)
+		v->update(elapsed);
+	for (auto v : characters)
+		v->update(elapsed);
+	for (auto v : bullets)
+		v->update(elapsed);
 
-		objects[i]->setColor(whiteColor);
-		for (int j = 0; j < objectCount; ++j)
+	// 캐릭터 VS 빌딩
+	for (auto it = characters.begin(); it != characters.end();)
+	{
+		if (buildings.size() > 0 && (*it)->intersect(buildings[0]))
 		{
-			if (objects[i] != objects[j])
-			{
-				if (objects[i]->intersect(objects[j]))
-				{
-					objects[i]->setColor(redColor);
-					objects[i]->attacked(0.001);
-					objects[j]->attacked(0.001);
-				}
-			}
+			// 빌딩 체력 깎기
+			buildings[0]->attacked((*it)->getLife());
+			if (buildings[0]->getLife() <= 0)
+				buildings.erase(buildings.begin());
+
+			// 캐릭터 삭제
+			delete *it;
+			it = characters.erase(it);
 		}
+		else
+			++it;
 	}
 
-	for (int i = 0; i < objectCount; ++i)
+	// 캐릭터 VS 총알
+	for (auto it_c = characters.begin(); it_c != characters.end();)
 	{
-		if (objects[i]->isDead())
+		auto character = *it_c;
+
+		for (auto it_b = bullets.begin(); character != nullptr && it_b != bullets.end();)
 		{
-			(objects.erase(objects.begin() + i));
-			objectCount = objects.size();
+			auto bullet = *it_b;
+
+			if (character->intersect(bullet))
+			{
+				// 캐릭터 체력 깎기 | 캐릭터 삭제
+				// TODO: 케릭터 체력(10)이 총알 체력(20)보다 작은데 ??
+				character->attacked(bullet->getLife());
+				if (character->getLife() <= 0)
+				{
+					delete character;
+					character = nullptr;
+					it_c = characters.erase(it_c);
+				}
+
+				// 총알 삭제
+				delete bullet;
+				it_b = bullets.erase(it_b);
+			}
+			else
+				++it_b;
 		}
+
+		if (character != nullptr)
+			++it_c;
+	}
+
+	// 총알 생성
+	if (buildings.size() > 0 && buildings[0]->getTime() > 0.5)
+	{
+		buildings[0]->setTime(buildings[0]->getTime() - 0.5);
+		addBulletObject(buildings[0]->getPositionX(), buildings[0]->getPositionY());
 	}
 }
 
 void SceneMgr::render()
 {
-	for (int i = 0; i < objectCount; ++i)
-	{
-		objects[i]->render(renderer);
-	}
+	for(auto v : buildings)
+		v->render(renderer);
+
+	for (auto v : characters)
+		v->render(renderer);
+
+	for (auto v : bullets)
+		v->render(renderer);
+	
 }

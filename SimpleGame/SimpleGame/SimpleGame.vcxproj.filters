@@ -30,9 +30,6 @@
     <ClInclude Include="Renderer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Locker.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -48,9 +45,6 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Renderer.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="Locker.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Object.cpp">

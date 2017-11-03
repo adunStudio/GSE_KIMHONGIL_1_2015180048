@@ -43,14 +43,16 @@ void Idle(void)
 
 void MouseInput(int button, int state, int x, int y)
 {
-	/*if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
+	if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON)
 		downed = true;
 
 	if (downed && state == GLUT_UP && button == GLUT_LEFT_BUTTON)
 	{
-		objects.push_back(new Locker(x - 250, (y - 250) * -1, 0, 10, 0, 1, 0, 1));
+		if(downed && sceneManager)
+			sceneManager->addCharacterObject(x - 250, (y - 250) * -1);
+
 		downed = false;
-	}*/
+	}
 
 }
 

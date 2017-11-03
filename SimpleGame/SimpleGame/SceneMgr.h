@@ -1,26 +1,31 @@
 #pragma once
 #include "stdafx.h"
-#include "Locker.h"
+#include "Object.h"
 #include "Renderer.h"
 #include <iostream>
 #include <vector>
 #include <memory>
 using namespace std;
 
+#define OBJECT_BUILDING  0
+#define OBJECT_CHARACTER 1
+#define OBJECT_BULLET    2
+#define OBJECT_ARROW     3
+
 class SceneMgr
 {
 private:
 	Renderer* renderer;
 
-	static const int MAX_OBJECTS_COUNT = 50;
-	vector<Object*> objects;
-	int objectCount = 0;
+	static const int MAX_CHARACTER_COUNT = 10;
 
-	void initilize();
-	void addObject();
+	vector<Object*> buildings;
+	vector<Object*> characters;
+	vector<Object*> bullets;
 
-	Color whiteColor = { 1, 1, 1, 1 };
-	Color redColor = { 1, 0, 0, 1 };
+	void init();
+	void addBuildingObject(float x, float y);
+	void addBulletObject(float x, float y);
 
 	float curTime, prevTime;
 
@@ -30,5 +35,7 @@ public:
 
 	void update();
 	void render();
+
+	void addCharacterObject(float x, float y);
 };
 

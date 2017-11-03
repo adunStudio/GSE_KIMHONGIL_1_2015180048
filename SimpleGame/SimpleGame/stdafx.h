@@ -6,5 +6,6 @@
 #include <tchar.h>
 #include <ctime>
 #include<Windows.h>
+#include <iostream>
 
 

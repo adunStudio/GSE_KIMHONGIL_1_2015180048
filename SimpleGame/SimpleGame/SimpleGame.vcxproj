@@ -155,7 +155,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Locker.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="SceneMgr.h" />
@@ -163,7 +162,6 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Locker.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="SceneMgr.cpp" />

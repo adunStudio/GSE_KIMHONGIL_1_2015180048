@@ -2,13 +2,50 @@
 #include "Object.h"
 
 
-Object::Object() : x(0), y(0), z(0), size(0), r(0), g(0), b(0), a(0) {};
+Object::Object(float _x, float _y, int _type) : x(_x), y(_y), z(0), a(1), type(_type)
+{
+	init();
+}
 
-Object::Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a)
-	: x(_x), y(_y), z(_z), size(_size), r(_r), g(_g), b(_b), a(_a), speedX(rand() / (float)RAND_MAX * 0.1f), speedY(rand() / (float)RAND_MAX * 0.1f) { }
+Object::~Object()
+{
+	std::cout << "객체 삭제 완료" << std::endl;
+}
 
+void Object::init()
+{
+	angle = rand() % 360;
 
-Object::~Object() { }
+	switch (type)
+	{
+	case OBJECT_BUILDING:
+		size = 50;
+		life = 500;
+		setSpeed(0);
+		r = 1; g = 1; b = 0;
+		break;
+	case OBJECT_CHARACTER:
+		size = 10;
+		life = 10;
+		setSpeed(300);
+		r = 1; g = 1; b = 1;
+		break;
+	case OBJECT_BULLET:
+		size = 2;
+		life = 20;
+		setSpeed(600);
+		r = 1; g = 0; b = 0;
+		break;
+	case OBJECT_ARROW:
+		size = 2;
+		life = 10;
+		setSpeed(100);
+		r = 0; g = 1; b = 0;
+		break;
+	}
+
+	
+}
 
 /* Setter / Getter */
 void Object::setSize(float _size) { size = _size; }
@@ -20,47 +57,52 @@ float Object::getPositionX() { return x; }
 void Object::setPositionY(float _y) { y = _y; }
 float Object::getPositionY() { return y; }
 
-void Object::setPositionZ(float _z) { z = _z; }
-float Object::getPositionZ() { return z; }
+float Object::getTime() { return lifeTime; }
+void Object::setTime(float _time) { lifeTime = _time; }
 
-void Object::setSpeedX(float _speedX) { speedX = _speedX;  }
-float Object::getSpeedX() { return speedX; }
+float Object::getLife() { return life; }
 
-void Object::setSpeedY(float _speedY) { speedY = _speedY;  }
-float Object::getSpeedY() { return speedY; }
-
-
-void Object::setColor(Color& color)
+void Object::setSpeed(float speed)
 {
-	r = color.r;
-	g = color.g;
-	b = color.b;
-	a = color.a;
-};
-
-Color& Object::getColor()
-{
-	Color color = { r, g, b, a };
-	return color;
+	speedX = speedY = speed;
 }
+
 
 bool Object::intersect(Object* obj)
 {
 	return (
-		x - size < obj->x + obj->size &&
-		x + size > obj->x - obj->size &&
-		y - size < obj->y + obj->size &&
-		y + size > obj->y - obj->size
+		x - size / 2 < obj->x + obj->size / 2 &&
+		x + size / 2 > obj->x - obj->size / 2 &&
+		y - size / 2 < obj->y + obj->size / 2 &&
+		y + size / 2 > obj->y - obj->size / 2
 		);
 }
 
-bool Object::isDead()
-{
-	return dead;
-}
 
 void Object::attacked(float damage)
 {
 	life -= damage;
+}
+
+void Object::update(float elapsed)
+{
+	lifeTime += elapsed;		
+
+	if (x < -250 || x > 250)
+		speedX *= -1;
+	
+		
+
+	if (y < -250 || y > 250)
+		speedY *= -1;
+	
+
+	x += cos(angle) * speedX * 0.0001;
+	y += sin(angle) * speedY * 0.0001;
+}
+
+void Object::render(Renderer* renderer)
+{
+	renderer->DrawSolidRect(x, y, z, size, r, g, b, a);
 }
 

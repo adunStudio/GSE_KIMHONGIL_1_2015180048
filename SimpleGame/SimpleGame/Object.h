@@ -7,20 +7,31 @@ struct Color
 	float r, g, b, a;
 };
 
+#define OBJECT_BUILDING  0
+#define OBJECT_CHARACTER 1
+#define OBJECT_BULLET    2
+#define OBJECT_ARROW     3
+
 class Object
 {
-protected:
+private:
 	float x, y, z;
 	float size;
+	int type;
 	float r, g, b, a;
 	float speedX, speedY;
-	float life = 0, lifeTime = 0;
-	bool dead = false;
+	float life;
+	float lifeTime = 0;
+	float angle;
+
+private:
+	void init();
 
 public:
-	Object();
-	Object(float _x, float _y, float _z, float _size, float _r, float _g, float _b, float _a);
-	virtual ~Object();
+	Object(float _x, float _y, int _type);
+	~Object();
+
+	void Object::setSpeed(float speed);
 
 	void setPositionX(float _x);
 	float getPositionX();
@@ -28,29 +39,20 @@ public:
 	void setPositionY(float _y);
 	float getPositionY();
 
-	void setPositionZ(float _z);
-	float getPositionZ();
-
-	void setPosition(float _x, float _y, float _z = 0);
-
 	void setSize(float _size);
 	float getSize();
 
-	void setSpeedX(float _speedX);
-	float getSpeedX();
-	void setSpeedY(float _speedY);
-	float getSpeedY();
+	float getTime();
+	void setTime(float _time);
 
-	void setColor(Color& color);
-	Color& getColor();
+	float getLife();
 
-	virtual void update(float elapsed) = 0;
 
-	virtual void render(Renderer* renderer) = 0;
+	void update(float elapsed);
+
+	void render(Renderer* renderer);
 
 	bool intersect(Object* obj);
-
-	bool isDead();
 
 	void attacked(float damage);
 };
