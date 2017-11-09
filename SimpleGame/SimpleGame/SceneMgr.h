@@ -22,10 +22,12 @@ private:
 	vector<Object*> buildings;
 	vector<Object*> characters;
 	vector<Object*> bullets;
+	vector<Object*> arrows;
 
 	void init();
 	void addBuildingObject(float x, float y);
 	void addBulletObject(float x, float y);
+	void addArrowObject(float x, float y, Object* parent);
 
 	bool collision(Object* obj1, Object* obj2);
 
@@ -37,7 +39,7 @@ public:
 
 	void update();
 	void render();
-	
+
 	void addCharacterObject(float x, float y);
 };
 

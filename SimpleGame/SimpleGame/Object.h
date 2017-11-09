@@ -1,6 +1,9 @@
 #pragma once
 
 #include "Renderer.h"
+#include <vector>
+
+using namespace std;
 
 struct Color
 {
@@ -24,6 +27,10 @@ private:
 	float lifeTime = 0;
 	float elapsedTime = 0;
 	float angle;
+	int texture = -1;
+
+	Object* parent = nullptr;
+	vector<Object*> children;
 
 private:
 	void init();
@@ -42,6 +49,11 @@ public:
 
 	void setSize(float _size);
 	float getSize();
+
+	void setParent(Object* _parent);
+	Object* getParent();
+
+	void addChild(Object* child);
 
 	float getTime();
 	void setTime(float _time);

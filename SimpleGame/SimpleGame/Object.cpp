@@ -15,8 +15,7 @@ Object::~Object()
 void Object::init()
 {
 	angle = rand() % 360;
-	lifeTime = 1000 + rand() % 1000;
-	std::cout << lifeTime << std::endl;
+	lifeTime = 100;
 
 	switch (type)
 	{
@@ -69,6 +68,20 @@ void Object::setSpeed(float speed)
 	speedX = speedY = speed;
 }
 
+void Object::setParent(Object* _parent)
+{
+	parent = _parent;
+}
+
+Object* Object::getParent()
+{
+	return parent;
+}
+
+void Object::addChild(Object* child)
+{
+	children.push_back(child);
+}
 
 bool Object::intersect(Object* obj)
 {
@@ -108,6 +121,14 @@ void Object::update(float elapsed)
 
 void Object::render(Renderer* renderer)
 {
-	renderer->DrawSolidRect(x, y, z, size, r, g, b, a);
+	if (type == OBJECT_BUILDING) 
+	{
+		if(texture < 0)
+			texture = renderer->CreatePngTexture("./resource/demon.png");
+		renderer->DrawTexturedRect(x, y, 0, size, r, g, b, a, texture);
+	}
+
+	else
+		renderer->DrawSolidRect(x, y, z, size, r, g, b, a);
 }
 
