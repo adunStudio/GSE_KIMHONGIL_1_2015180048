@@ -22,7 +22,7 @@ void Object::init()
 	{
 	case OBJECT_BUILDING:
 		size = 50;
-		life = 5;
+		life = 500;
 		setSpeed(0);
 		r = 1; g = 1; b = 0;
 		break;

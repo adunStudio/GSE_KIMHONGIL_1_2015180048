@@ -215,171 +215,153 @@ void SceneMgr::update()
 			it_c = blue_characters.erase(it_c);
 	}
 
-	/*
 
-	// 캐릭터 VS 빌딩
-	for (auto it = characters.begin(); it != characters.end();)
-	{
-		if (buildings.size() > 0 && collision((*it), buildings[0]))
-		{
-			// 빌딩 체력 깎기
-			buildings[0]->attacked((*it)->getLife());
-			if (buildings[0]->getLife() <= 0)
-				buildings.erase(buildings.begin());
-
-			// 캐릭터 삭제
-			delete *it;
-			it = characters.erase(it);
-		}
-		else
-			++it;
-	}
-
-	// 캐릭터  VS  총알
-	for (auto it_c = characters.begin(); it_c != characters.end();)
+	// 레드팀 캐릭터 vs 블루팀 총알
+	for (auto it_c = red_characters.begin(); it_c != red_characters.end();)
 	{
 		auto character = *it_c;
 
-		for (auto it_b = bullets.begin(); character != nullptr && it_b != bullets.end();)
+		for (auto it_b = blue_bullets.begin(); character != nullptr && it_b != blue_bullets.end();)
 		{
 			auto bullet = *it_b;
 
 			if (collision(character, bullet))
 			{
-				// 캐릭터 체력 깎기 | 캐릭터 삭제
-				// TODO: 케릭터 체력(10)이 총알 체력(20)보다 작은데 ??
-				character->attacked(bullet->getLife());
-				if (character->getLife() <= 0)
-				{
-					delete character;
-					character = nullptr;
-					it_c = characters.erase(it_c);
-				}
+				bullet->attacked(character->getLife());
 
-				// 총알 삭제
-				delete bullet;
-				it_b = bullets.erase(it_b);
+				delete character;
+				character = nullptr;
+
+				if (bullet->getLife() <= 0)
+				{
+					delete bullet;
+					bullet = nullptr;
+				}
 			}
-			else
+
+			if (bullet != nullptr)
 				++it_b;
+			else
+				it_b = blue_bullets.erase(it_b);
+
 		}
 
 		if (character != nullptr)
 			++it_c;
-	}
-	
-	// 화살 VS 빌딩
-	for (auto it_a = arrows.begin(); it_a != arrows.end();)
-	{
-		auto arrow = *it_a;
-
-		if (buildings.size() > 0 && collision(arrow, buildings[0]))
-		{
-			// 빌딩 체력 깎기
-			buildings[0]->attacked(arrow->getLife());
-			if (buildings[0]->getLife() <= 0)
-				buildings.erase(buildings.begin());
-
-			// 화살 삭제
-			delete *it_a;
-			it_a = arrows.erase(it_a);
-		}
 		else
-			++it_a;
+			it_c = red_characters.erase(it_c);
 	}
 
-	// 캐릭터  VS  화살
-	for (auto it_c = characters.begin(); it_c != characters.end();)
+
+	// 블루팀 캐릭터 vs 레드팀 총알
+	for (auto it_c = blue_characters.begin(); it_c != blue_characters.end();)
 	{
 		auto character = *it_c;
 
-		for (auto it_a = arrows.begin(); character != nullptr && it_a != arrows.end();)
+		for (auto it_b = red_bullets.begin(); character != nullptr && it_b != red_bullets.end();)
 		{
-			auto arrow = *it_a;
+			auto bullet = *it_b;
 
-			if (arrow->getParent() != character && collision(character, arrow))
+			if (collision(character, bullet))
 			{
-				// 캐릭터 체력 깎기 | 캐릭터 삭제
-				character->attacked(arrow->getLife());
-				if (character->getLife() <= 0)
-				{
-					delete character;
-					character = nullptr;
-					it_c = characters.erase(it_c);
-				}
+				bullet->attacked(character->getLife());
 
-				// 화살 삭제
-				delete arrow;
-				it_a = arrows.erase(it_a);
+				delete character;
+				character = nullptr;
+
+				if (bullet->getLife() <= 0)
+				{
+					delete bullet;
+					bullet = nullptr;
+				}
 			}
+
+			if (bullet != nullptr)
+				++it_b;
 			else
-				++it_a;
+				it_b = red_bullets.erase(it_b);
+
 		}
 
 		if (character != nullptr)
 			++it_c;
-	}
-	
-	
-	// 부모가 없는 총알 삭제
-	for (auto it = arrows.begin(); it != arrows.end();)
-	{
-		if (std::find(characters.begin(), characters.end(), (*it)->getParent()) == characters.end())
-			it = arrows.erase(it);
 		else
-			++it;
+			it_c = blue_characters.erase(it_c);
 	}
 
-	// 총알 생성
-	if (buildings.size() > 0 && buildings[0]->getTime() > 0.5)
+
+	// 레드팀 캐릭터 vs 블루팀 화살
+	for (auto it_c = red_characters.begin(); it_c != red_characters.end();)
 	{
-		buildings[0]->setTime(buildings[0]->getTime() - 0.5);
-		addBulletObject(buildings[0]->getPositionX(), buildings[0]->getPositionY());
+		auto character = *it_c;
+
+		for (auto it_b = blue_arrows.begin(); character != nullptr && it_b != blue_arrows.end();)
+		{
+			auto arrow = *it_b;
+
+			if (collision(character, arrow))
+			{
+				arrow->attacked(character->getLife());
+
+				delete character;
+				character = nullptr;
+
+				if (arrow->getLife() <= 0)
+				{
+					delete arrow;
+					arrow = nullptr;
+				}
+			}
+
+			if (arrow != nullptr)
+				++it_b;
+			else
+				it_b = blue_arrows.erase(it_b);
+
+		}
+
+		if (character != nullptr)
+			++it_c;
+		else
+			it_c = red_characters.erase(it_c);
 	}
 
-	// 화살 생성
-	for (auto c : characters)
-	{
-		if (c->getTime() > 0.5)
-		{
-			c->setTime(c->getTime() - 0.5);
-			addArrowObject(c->getPositionX(), c->getPositionY(), c);
-		}
-	}
-	*/
-	// 라이프 타임
-	/*for (auto it = characters.begin(); it != characters.end();)
-	{
-		if ((*it)->isDead())
-		{
-			delete *it;
-			it = characters.erase(it);
-		}
-		else
-			++it;
-	}
 
-	for (auto it = bullets.begin(); it != bullets.end();)
+	// 블루팀 캐릭터 vs 레드팀 화살
+	for (auto it_c = blue_characters.begin(); it_c != blue_characters.end();)
 	{
-		if ((*it)->isDead())
-		{
-			delete *it;
-			it = bullets.erase(it);
-		}
-		else
-			++it;
-	}
+		auto character = *it_c;
 
-	for (auto it = arrows.begin(); it != arrows.end();)
-	{
-		if ((*it)->isDead())
+		for (auto it_b = red_arrows.begin(); character != nullptr && it_b != red_arrows.end();)
 		{
-			delete *it;
-			it = arrows.erase(it);
+			auto arrow = *it_b;
+
+			if (collision(character, arrow))
+			{
+				arrow->attacked(character->getLife());
+
+				delete character;
+				character = nullptr;
+
+				if (arrow->getLife() <= 0)
+				{
+					delete arrow;
+					arrow = nullptr;
+				}
+			}
+
+			if (arrow != nullptr)
+				++it_b;
+			else
+				it_b = red_arrows.erase(it_b);
+
 		}
+
+		if (character != nullptr)
+			++it_c;
 		else
-			++it;
-	}*/
+			it_c = blue_characters.erase(it_c);
+	}
 }
 
 void SceneMgr::render()
