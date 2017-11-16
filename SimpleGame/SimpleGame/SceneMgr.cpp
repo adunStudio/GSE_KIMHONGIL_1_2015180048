@@ -33,21 +33,25 @@ void SceneMgr::addBuildingObject(float x, float y, int team)
 		blue_buildings.push_back(new Object(x, y, OBJECT_BUILDING, team));
 }
 
-void SceneMgr::addCharacterObject(float x, float y)
+void SceneMgr::addBlueCharacterObject(float x, float y)
 {
-	//if (team == RED_TEAM)
-		//red_characters.push_back();
-	//if (characters.size() < MAX_CHARACTER_COUNT)
-	//{
-		//characters.push_back(new Object(x, y, OBJECT_CHARACTER));
-	//}
+	if (blue_time >= BLUE_CHARACTER_COOLTIME && y < 0)
+	{
+		blue_time = 0;
+		blue_characters.push_back(new Object(x, y, OBJECT_CHARACTER, BLUE_TEAM));
+	}
 }
 
 void SceneMgr::addRedCharacterObject()
 {
-	int x = -250 + (rand() % WIDTH);
-	int y = (rand() % (HEIGHT / 2));
-	red_characters.push_back(new Object(x, y, OBJECT_CHARACTER, RED_TEAM));
+	if (red_time >= RED_CHARACTER_COOLTIME)
+	{
+		red_time = 0;
+
+		int x = -250 + (rand() % WIDTH);
+		int y = (rand() % (HEIGHT / 2));
+		red_characters.push_back(new Object(x, y, OBJECT_CHARACTER, RED_TEAM));
+	}
 }
 
 void SceneMgr::addBulletObject(float x, float y, int team)
@@ -58,12 +62,12 @@ void SceneMgr::addBulletObject(float x, float y, int team)
 		blue_bullets.push_back(new Object(x, y, OBJECT_BULLET, team));
 }
 
-void SceneMgr::addArrowObject(float x, float y, Object* parent)
+void SceneMgr::addArrowObject(float x, float y, int team)
 {
-	/*auto arrow = new Object(x, y, OBJECT_ARROW);
-	arrow->setParent(parent);
-
-	arrows.push_back(arrow);*/
+	if (team == RED_TEAM)
+		red_arrows.push_back(new Object(x, y, OBJECT_ARROW, team));
+	else
+		blue_arrows.push_back(new Object(x, y, OBJECT_ARROW, team));
 }
 
 bool SceneMgr::collision(Object* obj1, Object* obj2)
@@ -95,40 +99,123 @@ void SceneMgr::update()
 	for (auto v : blue_characters)
 		v->update(elapsed);
 
+	for (auto v : red_arrows)
+		v->update(elapsed);
+	for (auto v : blue_arrows)
+		v->update(elapsed);
+
 	// ·¹µåÆÀ Ä³¸¯ÅÍ »ý¼º
-	if (red_time >= 5)
-	{
-		red_time -= 5;
-		addRedCharacterObject();
-	}
+	addRedCharacterObject();
 
 	// ÃÑ¾Ë »ý¼º
 	for (auto v : red_buildings)
 	{
-		if (v->getTime() >= 10)
+		if (v->getTime() >= BULLET_COOLTIME)
 		{
-			v->setTime(v->getTime() - 10);
+			v->setTime(0);
 			addBulletObject(v->getPositionX(), v->getPositionY(), RED_TEAM);
 		}
 	}
 	for (auto v : blue_buildings)
 	{
-		if (v->getTime() >= 10)
+		if (v->getTime() >= BULLET_COOLTIME)
 		{
-			v->setTime(v->getTime() - 10);
+			v->setTime(0);
 			addBulletObject(v->getPositionX(), v->getPositionY(), BLUE_TEAM);
 		}
 	}
 
 	// È­»ì »ý¼º
+	for (auto v : red_characters)
+	{
+		if (v->getTime() >= ARROW_COOLTIME)
+		{
+			v->setTime(0);
+			addArrowObject(v->getPositionX(), v->getPositionY(), v->team);
+		}
+	}
+	for (auto v : blue_characters)
+	{
+		if (v->getTime() >= ARROW_COOLTIME)
+		{
+			v->setTime(0);
+			addArrowObject(v->getPositionX(), v->getPositionY(), v->team);
+		}
+	}
 
 
-	/*for (auto v : characters)
-		v->update(elapsed);
-	for (auto v : bullets)
-		v->update(elapsed);
-	for (auto v : arrows)
-		v->update(elapsed);
+	// ·¹µåÆÀ Ä³¸¯ÅÍ vs ºí·çÆÀ ºôµù
+	for (auto it_c = red_characters.begin(); it_c != red_characters.end();)
+	{
+		auto character = *it_c;
+		
+		for (auto it_b = blue_buildings.begin(); character != nullptr && it_b != blue_buildings.end();)
+		{
+			auto building = *it_b;
+
+			if (collision(character, building))
+			{
+				building->attacked(character->getLife());
+
+				delete character;
+				character = nullptr;
+
+				if (building->getLife() <= 0)
+				{
+					delete building;
+					building = nullptr;
+				}
+			}
+
+			if (building != nullptr)
+				++it_b;
+			else
+				it_b = blue_buildings.erase(it_b);
+			
+		}
+
+		if (character != nullptr)
+			++it_c;
+		else
+			it_c = red_characters.erase(it_c);
+	}
+
+	// ºí·çÆÀ Ä³¸¯ÅÍ vs ·¹µåÆÀ ºôµù
+	for (auto it_c = blue_characters.begin(); it_c != blue_characters.end();)
+	{
+		auto character = *it_c;
+
+		for (auto it_b = red_buildings.begin(); character != nullptr && it_b != red_buildings.end();)
+		{
+			auto building = *it_b;
+
+			if (collision(character, building))
+			{
+				building->attacked(character->getLife());
+
+				delete character;
+				character = nullptr;
+
+				if (building->getLife() <= 0)
+				{
+					delete building;
+					building = nullptr;
+				}
+			}
+
+			if (building != nullptr)
+				++it_b;
+			else
+				it_b = red_buildings.erase(it_b);
+		}
+
+		if (character != nullptr)
+			++it_c;
+		else
+			it_c = blue_characters.erase(it_c);
+	}
+
+	/*
 
 	// Ä³¸¯ÅÍ VS ºôµù
 	for (auto it = characters.begin(); it != characters.end();)
@@ -312,16 +399,8 @@ void SceneMgr::render()
 	for (auto v : blue_characters)
 		v->render(renderer);
 
-	/*for (auto v : buildings)
+	for (auto v : red_arrows)
 		v->render(renderer);
-
-	for (auto v : characters)
+	for (auto v : blue_arrows)
 		v->render(renderer);
-
-	for (auto v : bullets)
-		v->render(renderer);
-
-	for (auto v : arrows)
-		v->render(renderer);
-		*/
 }

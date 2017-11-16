@@ -50,7 +50,7 @@ void MouseInput(int button, int state, int x, int y)
 	if (downed && state == GLUT_UP && button == GLUT_LEFT_BUTTON)
 	{
 		if(downed && sceneManager)
-			sceneManager->addCharacterObject(x - WIDTH/2, (y - HEIGHT/2) * -1);
+			sceneManager->addBlueCharacterObject(x - WIDTH/2, (y - HEIGHT/2) * -1);
 
 		downed = false;
 	}

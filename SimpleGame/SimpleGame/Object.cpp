@@ -22,7 +22,7 @@ void Object::init()
 	{
 	case OBJECT_BUILDING:
 		size = 50;
-		life = 500;
+		life = 5;
 		setSpeed(0);
 		r = 1; g = 1; b = 0;
 		break;
@@ -44,7 +44,8 @@ void Object::init()
 		size = 2;
 		life = 10;
 		setSpeed(100);
-		r = 0; g = 1; b = 0;
+		if (team == RED_TEAM) { r = 0.5; g = 0.2; b = 0.7; }
+		else { r = 1; g = 1; b = 0; }
 		break;
 	}
 

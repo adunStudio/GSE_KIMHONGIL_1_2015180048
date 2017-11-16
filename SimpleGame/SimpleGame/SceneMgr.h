@@ -30,7 +30,7 @@ private:
 	void addBulletObject(float x, float y, int team);
 	void addRedCharacterObject();
 	
-	void addArrowObject(float x, float y, Object* parent);
+	void addArrowObject(float x, float y, int team);
 
 	bool collision(Object* obj1, Object* obj2);
 
@@ -46,6 +46,6 @@ public:
 	void update();
 	void render();
 
-	void addCharacterObject(float x, float y);
+	void addBlueCharacterObject(float x, float y);
 };
 
