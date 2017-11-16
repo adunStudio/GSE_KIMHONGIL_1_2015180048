@@ -1,16 +1,12 @@
 #pragma once
 #include "stdafx.h"
+#include "define.h"
 #include "Object.h"
 #include "Renderer.h"
 #include <iostream>
 #include <vector>
 #include <memory>
 using namespace std;
-
-#define OBJECT_BUILDING  0
-#define OBJECT_CHARACTER 1
-#define OBJECT_BULLET    2
-#define OBJECT_ARROW     3
 
 class SceneMgr
 {
@@ -19,14 +15,21 @@ private:
 
 	static const int MAX_CHARACTER_COUNT = 10;
 
-	vector<Object*> buildings;
-	vector<Object*> characters;
-	vector<Object*> bullets;
-	vector<Object*> arrows;
+	vector<Object*> red_buildings;
+	vector<Object*> red_characters;
+	vector<Object*> red_bullets;
+	vector<Object*> red_arrows;
+
+	vector<Object*> blue_buildings;
+	vector<Object*> blue_characters;
+	vector<Object*> blue_bullets;
+	vector<Object*> blue_arrows;
 
 	void init();
-	void addBuildingObject(float x, float y);
-	void addBulletObject(float x, float y);
+	void addBuildingObject(float x, float y, int team);
+	void addBulletObject(float x, float y, int team);
+	void addRedCharacterObject();
+	
 	void addArrowObject(float x, float y, Object* parent);
 
 	bool collision(Object* obj1, Object* obj2);
@@ -36,6 +39,9 @@ private:
 public:
 	SceneMgr(Renderer* _renderer);
 	~SceneMgr();
+
+	float red_time = 0;
+	float blue_time = 0;
 
 	void update();
 	void render();

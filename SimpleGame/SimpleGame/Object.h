@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Renderer.h"
+#include "define.h"
 #include <vector>
 
 using namespace std;
@@ -10,10 +11,6 @@ struct Color
 	float r, g, b, a;
 };
 
-#define OBJECT_BUILDING  0
-#define OBJECT_CHARACTER 1
-#define OBJECT_BULLET    2
-#define OBJECT_ARROW     3
 
 class Object
 {
@@ -32,11 +29,14 @@ private:
 	Object* parent = nullptr;
 	vector<Object*> children;
 
+public:
+	int team;
+
 private:
 	void init();
 
 public:
-	Object(float _x, float _y, int _type);
+	Object(float _x, float _y, int _type, int _team);
 	~Object();
 
 	void Object::setSpeed(float speed);

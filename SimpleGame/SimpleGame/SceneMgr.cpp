@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "SceneMgr.h"
 
-
 SceneMgr::SceneMgr(Renderer* _renderer) : renderer(_renderer), curTime(0), prevTime(0)
 {
 	prevTime = static_cast<float>(timeGetTime() * 0.001f);
@@ -15,33 +14,56 @@ SceneMgr::~SceneMgr()
 
 void SceneMgr::init()
 {
-	addBuildingObject(0, 0);
+	srand(time(NULL));
+
+	addBuildingObject(-150, 300, RED_TEAM);
+	addBuildingObject(0, 330, RED_TEAM);
+	addBuildingObject(150, 300, RED_TEAM);
+
+	addBuildingObject(-150, -300, BLUE_TEAM);
+	addBuildingObject(0, -330, BLUE_TEAM);
+	addBuildingObject(150, -300, BLUE_TEAM);
 }
 
-void SceneMgr::addBuildingObject(float x, float y)
+void SceneMgr::addBuildingObject(float x, float y, int team)
 {
-	buildings.push_back(new Object(x, y, OBJECT_BUILDING));
+	if (team == RED_TEAM)
+		red_buildings.push_back(new Object(x, y, OBJECT_BUILDING, team));
+	else
+		blue_buildings.push_back(new Object(x, y, OBJECT_BUILDING, team));
 }
 
 void SceneMgr::addCharacterObject(float x, float y)
 {
-	if (characters.size() < MAX_CHARACTER_COUNT)
-	{
-		characters.push_back(new Object(x, y, OBJECT_CHARACTER));
-	}
+	//if (team == RED_TEAM)
+		//red_characters.push_back();
+	//if (characters.size() < MAX_CHARACTER_COUNT)
+	//{
+		//characters.push_back(new Object(x, y, OBJECT_CHARACTER));
+	//}
 }
 
-void SceneMgr::addBulletObject(float x, float y)
+void SceneMgr::addRedCharacterObject()
 {
-	bullets.push_back(new Object(x, y, OBJECT_BULLET));
+	int x = -250 + (rand() % WIDTH);
+	int y = (rand() % (HEIGHT / 2));
+	red_characters.push_back(new Object(x, y, OBJECT_CHARACTER, RED_TEAM));
+}
+
+void SceneMgr::addBulletObject(float x, float y, int team)
+{
+	if (team == RED_TEAM)
+		red_bullets.push_back(new Object(x, y, OBJECT_BULLET, team));
+	else
+		blue_bullets.push_back(new Object(x, y, OBJECT_BULLET, team));
 }
 
 void SceneMgr::addArrowObject(float x, float y, Object* parent)
 {
-	auto arrow = new Object(x, y, OBJECT_ARROW);
+	/*auto arrow = new Object(x, y, OBJECT_ARROW);
 	arrow->setParent(parent);
 
-	arrows.push_back(arrow);
+	arrows.push_back(arrow);*/
 }
 
 bool SceneMgr::collision(Object* obj1, Object* obj2)
@@ -55,9 +77,53 @@ void SceneMgr::update()
 	float elapsed = curTime - prevTime;
 	prevTime = curTime;
 
-	for (auto v : buildings)
+	red_time  += elapsed;
+	blue_time += elapsed;
+
+	for (auto v : red_buildings)
 		v->update(elapsed);
-	for (auto v : characters)
+	for (auto v : blue_buildings)
+		v->update(elapsed);
+
+	for (auto v : red_bullets)
+		v->update(elapsed);
+	for (auto v : blue_bullets)
+		v->update(elapsed);
+
+	for (auto v : red_characters)
+		v->update(elapsed);
+	for (auto v : blue_characters)
+		v->update(elapsed);
+
+	// 레드팀 캐릭터 생성
+	if (red_time >= 5)
+	{
+		red_time -= 5;
+		addRedCharacterObject();
+	}
+
+	// 총알 생성
+	for (auto v : red_buildings)
+	{
+		if (v->getTime() >= 10)
+		{
+			v->setTime(v->getTime() - 10);
+			addBulletObject(v->getPositionX(), v->getPositionY(), RED_TEAM);
+		}
+	}
+	for (auto v : blue_buildings)
+	{
+		if (v->getTime() >= 10)
+		{
+			v->setTime(v->getTime() - 10);
+			addBulletObject(v->getPositionX(), v->getPositionY(), BLUE_TEAM);
+		}
+	}
+
+	// 화살 생성
+
+
+	/*for (auto v : characters)
 		v->update(elapsed);
 	for (auto v : bullets)
 		v->update(elapsed);
@@ -193,7 +259,7 @@ void SceneMgr::update()
 			addArrowObject(c->getPositionX(), c->getPositionY(), c);
 		}
 	}
-
+	*/
 	// 라이프 타임
 	/*for (auto it = characters.begin(); it != characters.end();)
 	{
@@ -231,7 +297,22 @@ void SceneMgr::update()
 
 void SceneMgr::render()
 {
-	for (auto v : buildings)
+	for (auto v : red_buildings)
+		v->render(renderer);
+	for (auto v : blue_buildings)
+		v->render(renderer);
+
+	for (auto v : red_bullets)
+		v->render(renderer);
+	for (auto v : blue_bullets)
+		v->render(renderer);
+
+	for (auto v : red_characters)
+		v->render(renderer);
+	for (auto v : blue_characters)
+		v->render(renderer);
+
+	/*for (auto v : buildings)
 		v->render(renderer);
 
 	for (auto v : characters)
@@ -242,4 +323,5 @@ void SceneMgr::render()
 
 	for (auto v : arrows)
 		v->render(renderer);
+		*/
 }

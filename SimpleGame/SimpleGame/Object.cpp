@@ -2,7 +2,8 @@
 #include "Object.h"
 
 
-Object::Object(float _x, float _y, int _type) : x(_x), y(_y), z(0), a(1), type(_type)
+Object::Object(float _x, float _y, int _type, int _team)
+	: x(_x), y(_y), z(0), a(1), type(_type), team(_team)
 {
 	init();
 }
@@ -29,13 +30,15 @@ void Object::init()
 		size = 10;
 		life = 10;
 		setSpeed(300);
-		r = 1; g = 1; b = 1;
+		if (team == RED_TEAM) { r = 1; g = 0; b = 0; }
+		else { r = 1; g = 0; b = 1; }
 		break;
 	case OBJECT_BULLET:
 		size = 2;
 		life = 20;
 		setSpeed(600);
-		r = 1; g = 0; b = 0;
+		if (team == RED_TEAM){r = 1; g = 0; b = 0;}
+		else                 {r = 1; g = 0; b = 1;}
 		break;
 	case OBJECT_ARROW:
 		size = 2;
@@ -106,25 +109,37 @@ bool Object::isDead()
 
 void Object::update(float elapsed)
 {
-	elapsedTime += elapsed;		
+	elapsedTime += elapsed;	
+	
 	lifeTime -= elapsed;
 
-	if (x < -250 || x > 250)
+	if (x < -WIDTH/2 || x > WIDTH/2)
 		speedX *= -1;
 	
-	if (y < -250 || y > 250)
+	if (y < -HEIGHT/2 || y > HEIGHT/2)
 		speedY *= -1;
 	
-	x += cos(angle) * speedX * 0.0001;
-	y += sin(angle) * speedY * 0.0001;
+	x += cos(angle) * speedX * 0.0005;
+	y += sin(angle) * speedY * 0.0005;
 }
 
 void Object::render(Renderer* renderer)
 {
 	if (type == OBJECT_BUILDING) 
 	{
-		if(texture < 0)
-			texture = renderer->CreatePngTexture("./resource/demon.png");
+		if (texture < 0)
+		{
+			switch (team)
+			{
+				case RED_TEAM:
+					texture = renderer->CreatePngTexture("./resource/red_team2.png");
+					break;
+
+				case BLUE_TEAM:
+					texture = renderer->CreatePngTexture("./resource/blue_team.png");
+					break;
+			}
+		}
 		renderer->DrawTexturedRect(x, y, 0, size, r, g, b, a, texture);
 	}
 

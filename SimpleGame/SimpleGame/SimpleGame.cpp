@@ -13,6 +13,7 @@ but WITHOUT ANY WARRANTY.
 #include "Dependencies\glew.h"
 #include "Dependencies\freeglut.h"
 
+#include "define.h"
 #include "Renderer.h"
 #include "SceneMgr.h"
 using namespace std;
@@ -49,7 +50,7 @@ void MouseInput(int button, int state, int x, int y)
 	if (downed && state == GLUT_UP && button == GLUT_LEFT_BUTTON)
 	{
 		if(downed && sceneManager)
-			sceneManager->addCharacterObject(x - 250, (y - 250) * -1);
+			sceneManager->addCharacterObject(x - WIDTH/2, (y - HEIGHT/2) * -1);
 
 		downed = false;
 	}
@@ -72,7 +73,7 @@ int main(int argc, char **argv)
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
 	glutInitWindowPosition(0, 0);
-	glutInitWindowSize(500, 500);
+	glutInitWindowSize(WIDTH, HEIGHT);
 	glutCreateWindow("Game Software Engineering KPU");
 
 	glewInit();
@@ -86,7 +87,7 @@ int main(int argc, char **argv)
 	}
 
 	// Initialize Renderer
-	g_Renderer = new Renderer(500, 500);
+	g_Renderer = new Renderer(WIDTH, HEIGHT);
 	if (!g_Renderer->IsInitialized())
 	{
 		std::cout << "Renderer could not be initialized.. \n";
