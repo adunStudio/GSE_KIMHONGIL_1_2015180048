@@ -144,223 +144,101 @@ void SceneMgr::update()
 	}
 
 
+	// 데미지 리스트
+
 	// 레드팀 캐릭터 vs 블루팀 빌딩
-	for (auto it_c = red_characters.begin(); it_c != red_characters.end();)
-	{
-		auto character = *it_c;
-		
-		for (auto it_b = blue_buildings.begin(); character != nullptr && it_b != blue_buildings.end();)
-		{
-			auto building = *it_b;
-
-			if (collision(character, building))
-			{
-				building->attacked(character->getLife());
-
-				delete character;
-				character = nullptr;
-
-				if (building->getLife() <= 0)
-				{
-					delete building;
-					building = nullptr;
-				}
-			}
-
-			if (building != nullptr)
-				++it_b;
-			else
-				it_b = blue_buildings.erase(it_b);
-			
-		}
-
-		if (character != nullptr)
-			++it_c;
-		else
-			it_c = red_characters.erase(it_c);
-	}
-
+	iterateCollision(red_characters, blue_buildings);
 	// 블루팀 캐릭터 vs 레드팀 빌딩
-	for (auto it_c = blue_characters.begin(); it_c != blue_characters.end();)
-	{
-		auto character = *it_c;
-
-		for (auto it_b = red_buildings.begin(); character != nullptr && it_b != red_buildings.end();)
-		{
-			auto building = *it_b;
-
-			if (collision(character, building))
-			{
-				building->attacked(character->getLife());
-
-				delete character;
-				character = nullptr;
-
-				if (building->getLife() <= 0)
-				{
-					delete building;
-					building = nullptr;
-				}
-			}
-
-			if (building != nullptr)
-				++it_b;
-			else
-				it_b = red_buildings.erase(it_b);
-		}
-
-		if (character != nullptr)
-			++it_c;
-		else
-			it_c = blue_characters.erase(it_c);
-	}
+	iterateCollision(blue_characters, red_buildings);
 
 
 	// 레드팀 캐릭터 vs 블루팀 총알
-	for (auto it_c = red_characters.begin(); it_c != red_characters.end();)
-	{
-		auto character = *it_c;
-
-		for (auto it_b = blue_bullets.begin(); character != nullptr && it_b != blue_bullets.end();)
-		{
-			auto bullet = *it_b;
-
-			if (collision(character, bullet))
-			{
-				bullet->attacked(character->getLife());
-
-				delete character;
-				character = nullptr;
-
-				if (bullet->getLife() <= 0)
-				{
-					delete bullet;
-					bullet = nullptr;
-				}
-			}
-
-			if (bullet != nullptr)
-				++it_b;
-			else
-				it_b = blue_bullets.erase(it_b);
-
-		}
-
-		if (character != nullptr)
-			++it_c;
-		else
-			it_c = red_characters.erase(it_c);
-	}
-
-
+	iterateCollision(red_characters, blue_bullets);
 	// 블루팀 캐릭터 vs 레드팀 총알
-	for (auto it_c = blue_characters.begin(); it_c != blue_characters.end();)
-	{
-		auto character = *it_c;
-
-		for (auto it_b = red_bullets.begin(); character != nullptr && it_b != red_bullets.end();)
-		{
-			auto bullet = *it_b;
-
-			if (collision(character, bullet))
-			{
-				bullet->attacked(character->getLife());
-
-				delete character;
-				character = nullptr;
-
-				if (bullet->getLife() <= 0)
-				{
-					delete bullet;
-					bullet = nullptr;
-				}
-			}
-
-			if (bullet != nullptr)
-				++it_b;
-			else
-				it_b = red_bullets.erase(it_b);
-
-		}
-
-		if (character != nullptr)
-			++it_c;
-		else
-			it_c = blue_characters.erase(it_c);
-	}
+	iterateCollision(blue_characters, red_bullets);
 
 
 	// 레드팀 캐릭터 vs 블루팀 화살
-	for (auto it_c = red_characters.begin(); it_c != red_characters.end();)
-	{
-		auto character = *it_c;
-
-		for (auto it_b = blue_arrows.begin(); character != nullptr && it_b != blue_arrows.end();)
-		{
-			auto arrow = *it_b;
-
-			if (collision(character, arrow))
-			{
-				arrow->attacked(character->getLife());
-
-				delete character;
-				character = nullptr;
-
-				if (arrow->getLife() <= 0)
-				{
-					delete arrow;
-					arrow = nullptr;
-				}
-			}
-
-			if (arrow != nullptr)
-				++it_b;
-			else
-				it_b = blue_arrows.erase(it_b);
-
-		}
-
-		if (character != nullptr)
-			++it_c;
-		else
-			it_c = red_characters.erase(it_c);
-	}
-
-
+	iterateCollision(red_characters, blue_arrows);
 	// 블루팀 캐릭터 vs 레드팀 화살
-	for (auto it_c = blue_characters.begin(); it_c != blue_characters.end();)
+	iterateCollision(blue_characters, red_arrows);
+
+
+	// Bullet 및 Arrow 가 화면에서 벗어나면 사라지도록 수정
+	outerCheckAndDelete(red_bullets);
+	outerCheckAndDelete(blue_bullets);
+	outerCheckAndDelete(red_arrows);
+	outerCheckAndDelete(blue_arrows);
+
+
+
+}
+
+void SceneMgr::iterateCollision(vector<Object*>& team1V, vector<Object*>& team2V)
+{
+
+	for (auto team1 = team1V.begin(); team1 != team1V.end();)
 	{
-		auto character = *it_c;
+		auto obj1 = *team1;
 
-		for (auto it_b = red_arrows.begin(); character != nullptr && it_b != red_arrows.end();)
+		for (auto team2 = team2V.begin(); obj1 != nullptr && team2 != team2V.end();)
 		{
-			auto arrow = *it_b;
+			auto obj2 = *team2;
 
-			if (collision(character, arrow))
+			if (collision(obj1, obj2))
 			{
-				arrow->attacked(character->getLife());
+				float obj1_life = obj1->getLife();
+				float obj2_life = obj2->getLife();
 
-				delete character;
-				character = nullptr;
+				obj1->attacked(obj2_life);
+				obj2->attacked(obj1_life);
 
-				if (arrow->getLife() <= 0)
+				if (obj1->getLife() <= 0);
 				{
-					delete arrow;
-					arrow = nullptr;
+					delete obj1;
+					obj1 = nullptr;
+				}
+
+				if (obj2->getLife() <= 0)
+				{
+					delete obj2;
+					obj2 = nullptr;
 				}
 			}
 
-			if (arrow != nullptr)
-				++it_b;
+			if (obj2 != nullptr)
+				++team2;
 			else
-				it_b = red_arrows.erase(it_b);
-
+				team2 = team2V.erase(team2);
 		}
 
-		if (character != nullptr)
-			++it_c;
+		if (obj1 != nullptr)
+			++team1;
 		else
-			it_c = blue_characters.erase(it_c);
+			team1 = team1V.erase(team1);
+	}
+}
+
+void SceneMgr::outerCheckAndDelete(vector<Object*>& v)
+{
+	for (auto it = v.begin(); it != v.end();)
+	{
+		auto obj = *it;
+
+		float x = obj->getPositionX();
+		float y = obj->getPositionY();
+
+		if (x < -WIDTH / 2 || x > WIDTH / 2 || y < -HEIGHT / 2 || y > HEIGHT / 2)
+		{
+			delete obj;
+			obj = nullptr;
+			std::cout << "경계선 넘어가서 삭제" << std::endl;
+		}
+
+		if (obj != nullptr)
+			++it;
+		else
+			it = v.erase(it);
 	}
 }
 

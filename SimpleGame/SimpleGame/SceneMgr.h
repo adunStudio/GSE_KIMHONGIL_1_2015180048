@@ -47,5 +47,7 @@ public:
 	void render();
 
 	void addBlueCharacterObject(float x, float y);
+	void iterateCollision(vector<Object*>& team1V, vector<Object*>& team2V);
+	void outerCheckAndDelete(vector<Object*>& v);
 };
 

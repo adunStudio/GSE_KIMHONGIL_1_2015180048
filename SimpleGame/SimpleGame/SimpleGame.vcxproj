@@ -177,14 +177,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="Shaders\SolidRect.fs" />
-    <None Include="Shaders\SolidRect.vs" />
-    <None Include="Shaders\SolidRectWithTexture.fs" />
-    <None Include="Shaders\SolidRectWithTexture.vs" />
-    <None Include="Shaders\SolidRectWithTextureSeq.fs" />
-    <None Include="Shaders\SolidRectWithTextureSeq.vs" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

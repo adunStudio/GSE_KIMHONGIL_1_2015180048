@@ -20,11 +20,13 @@ private:
 	int type;
 	float r, g, b, a;
 	float speedX, speedY;
+	float m_maxLife = 0;
 	float life;
 	float lifeTime = 0;
 	float elapsedTime = 0;
 	float angle;
 	int texture = -1;
+	float m_drawLevel = 0;
 
 	Object* parent = nullptr;
 	vector<Object*> children;

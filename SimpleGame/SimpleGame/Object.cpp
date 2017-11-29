@@ -21,31 +21,39 @@ void Object::init()
 	switch (type)
 	{
 	case OBJECT_BUILDING:
-		size = 50;
+		size = 100;
 		life = 500;
+		m_maxLife = 500;
 		setSpeed(0);
 		r = 1; g = 1; b = 0;
+		m_drawLevel = LEVEL_BUILDING;
 		break;
 	case OBJECT_CHARACTER:
-		size = 10;
-		life = 10;
+		size = 30;
+		life = 100;
+		m_maxLife = 100;
 		setSpeed(300);
 		if (team == RED_TEAM) { r = 1; g = 0; b = 0; }
 		else { r = 1; g = 0; b = 1; }
+		m_drawLevel = LEVEL_CHARACTER;
 		break;
 	case OBJECT_BULLET:
-		size = 2;
-		life = 20;
+		size = 4;
+		life = 15;
+		m_maxLife = 15;
 		setSpeed(600);
 		if (team == RED_TEAM){r = 1; g = 0; b = 0;}
 		else                 {r = 1; g = 0; b = 1;}
+		m_drawLevel = LEVEL_BULLET;
 		break;
 	case OBJECT_ARROW:
-		size = 2;
+		size = 4;
 		life = 10;
+		m_maxLife = 10;
 		setSpeed(100);
 		if (team == RED_TEAM) { r = 0.5; g = 0.2; b = 0.7; }
 		else { r = 1; g = 1; b = 0; }
+		m_drawLevel = LEVEL_ARROW;
 		break;
 	}
 
@@ -114,11 +122,19 @@ void Object::update(float elapsed)
 	
 	lifeTime -= elapsed;
 
-	if (x < -WIDTH/2 || x > WIDTH/2)
-		speedX *= -1;
+	if (type == OBJECT_CHARACTER)
+	{
+		if (x < -WIDTH / 2 || x > WIDTH / 2)
+			speedX *= -1;
+
+		if (y < -HEIGHT / 2 || y > HEIGHT / 2)
+			speedY *= -1;
+	}
+	else
+	{
+
+	}
 	
-	if (y < -HEIGHT/2 || y > HEIGHT/2)
-		speedY *= -1;
 	
 	x += cos(angle) * speedX * 0.0005;
 	y += sin(angle) * speedY * 0.0005;
@@ -141,10 +157,19 @@ void Object::render(Renderer* renderer)
 					break;
 			}
 		}
-		renderer->DrawTexturedRect(x, y, 0, size, r, g, b, a, texture);
+		renderer->DrawTexturedRect(x, y, 0, size, r, g, b, a, texture, m_drawLevel);
 	}
 
 	else
-		renderer->DrawSolidRect(x, y, z, size, r, g, b, a);
+		renderer->DrawSolidRect(x, y, z, size, r, g, b, a, m_drawLevel);
+
+	if (type == OBJECT_BUILDING || type == OBJECT_CHARACTER)
+	{
+		if (team == RED_TEAM)
+			renderer->DrawSolidRectGauge(x, y + 10 + (size / 2), z, size, 10, 1, 0, 0, 1, life / m_maxLife, m_drawLevel);
+		else
+			renderer->DrawSolidRectGauge(x, y + 10 + (size / 2), z, size, 10, 0, 0, 1, 1, life / m_maxLife, m_drawLevel);
+	}
+
 }
 
