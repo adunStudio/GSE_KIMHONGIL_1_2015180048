@@ -25,6 +25,8 @@ private:
 	vector<Object*> blue_bullets;
 	vector<Object*> blue_arrows;
 
+	Object* background = nullptr;
+
 	void init();
 	void addBuildingObject(float x, float y, int team);
 	void addBulletObject(float x, float y, int team);

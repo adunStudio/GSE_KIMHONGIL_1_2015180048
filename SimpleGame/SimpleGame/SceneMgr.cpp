@@ -23,6 +23,8 @@ void SceneMgr::init()
 	addBuildingObject(-150, -300, BLUE_TEAM);
 	addBuildingObject(0, -330, BLUE_TEAM);
 	addBuildingObject(150, -300, BLUE_TEAM);
+
+	background = new Object(0, 0, OBJECT_BACKGROUND, 0);
 }
 
 void SceneMgr::addBuildingObject(float x, float y, int team)
@@ -244,6 +246,8 @@ void SceneMgr::outerCheckAndDelete(vector<Object*>& v)
 
 void SceneMgr::render()
 {
+	background->render(renderer);
+
 	for (auto v : red_buildings)
 		v->render(renderer);
 	for (auto v : blue_buildings)

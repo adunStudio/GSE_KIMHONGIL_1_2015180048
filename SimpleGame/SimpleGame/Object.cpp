@@ -20,6 +20,9 @@ void Object::init()
 
 	switch (type)
 	{
+	case OBJECT_BACKGROUND:
+		m_drawLevel = LEVEL_BACKGROUND;
+		break;
 	case OBJECT_BUILDING:
 		size = 100;
 		life = 500;
@@ -119,8 +122,14 @@ bool Object::isDead()
 void Object::update(float elapsed)
 {
 	elapsedTime += elapsed;	
-	
+	frameTime += elapsed;
 	lifeTime -= elapsed;
+
+	if (frameTime > 0.2)
+	{
+		frame = (frame + 1) % 4;
+		frameTime = 0;
+	}
 
 	if (type == OBJECT_CHARACTER)
 	{
@@ -142,26 +151,53 @@ void Object::update(float elapsed)
 
 void Object::render(Renderer* renderer)
 {
-	if (type == OBJECT_BUILDING) 
+
+	switch (type)
 	{
+	case OBJECT_BACKGROUND:
+		if(texture < 0)
+			texture = renderer->CreatePngTexture("./resource/background.png");
+		
+		renderer->DrawTexturedRect(0, 0, 0, 800, 1, 1, 1, 1, texture, m_drawLevel);
+		break;
+
+	case OBJECT_CHARACTER:
+		if (texture < 0)
+			texture = renderer->CreatePngTexture("./resource/slime.png");
+
+		renderer->DrawTexturedRectSeq(x,  y, 0, size, 1, 1, 1, 1, texture, frame, 0, 4, 1, m_drawLevel);
+		break;
+
+	case OBJECT_BULLET:
+		if (texture < 0)
+			texture = renderer->CreatePngTexture("./resource/particle.png");
+		renderer->DrawParticle(x, y, 0, size, 1, 1, 1, 1, -1 * speedX / abs(speedX) * cos(angle),  -1 * speedY / abs(speedY) * sin(angle), texture, elapsedTime);
+
+		break;
+
+	case OBJECT_BUILDING:
 		if (texture < 0)
 		{
 			switch (team)
 			{
-				case RED_TEAM:
-					texture = renderer->CreatePngTexture("./resource/red_team2.png");
-					break;
+			case RED_TEAM:
+				texture = renderer->CreatePngTexture("./resource/red_team2.png");
+				break;
 
-				case BLUE_TEAM:
-					texture = renderer->CreatePngTexture("./resource/blue_team.png");
-					break;
+			case BLUE_TEAM:
+				texture = renderer->CreatePngTexture("./resource/blue_team.png");
+				break;
 			}
 		}
-		renderer->DrawTexturedRect(x, y, 0, size, r, g, b, a, texture, m_drawLevel);
+		renderer->DrawTexturedRect(x, y, 0, size, 1, 1, 1, 1, texture, m_drawLevel);
+		break;
+		
+	default:
+		renderer->DrawSolidRect(x, y, z, size, r, g, b, a, m_drawLevel);
+
 	}
 
-	else
-		renderer->DrawSolidRect(x, y, z, size, r, g, b, a, m_drawLevel);
+	
 
 	if (type == OBJECT_BUILDING || type == OBJECT_CHARACTER)
 	{

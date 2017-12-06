@@ -27,6 +27,8 @@ private:
 	float angle;
 	int texture = -1;
 	float m_drawLevel = 0;
+	int frame = 0;
+	float frameTime = 0;
 
 	Object* parent = nullptr;
 	vector<Object*> children;
