@@ -189,7 +189,11 @@ void Object::render(Renderer* renderer)
 				break;
 			}
 		}
+
 		renderer->DrawTexturedRect(x, y, 0, size, 1, 1, 1, 1, texture, m_drawLevel);
+		char text[10];
+		_itoa_s(life, text, 10);
+		renderer->DrawText(x-10, y, GLUT_BITMAP_TIMES_ROMAN_10, 1, 1, 0, text);
 		break;
 		
 	default:

@@ -1,4 +1,4 @@
-ï»¿#include "stdafx.h"
+#include "stdafx.h"
 #include "Renderer.h"
 #include "LoadPng.h"
 
@@ -10,6 +10,61 @@ Renderer::Renderer(int windowSizeX, int windowSizeY)
 
 Renderer::~Renderer()
 {
+	ReleaseAllResources();
+}
+
+void Renderer::ReleaseAllResources()
+{
+	if (m_VBORect != 0)
+	{
+		glDeleteBuffers(1, &m_VBORect);
+	}
+	if (m_VBORectTex != 0)
+	{
+		glDeleteBuffers(1, &m_VBORectTex);
+	}
+	if (m_VBORectBorder != 0)
+	{
+		glDeleteBuffers(1, &m_VBORectBorder);
+	}
+	if (m_VBOParticles != 0)
+	{
+		glDeleteBuffers(1, &m_VBOParticles);
+	}
+
+	if (m_SolidRectShader != 0)
+	{
+		glDeleteShader(m_SolidRectShader);
+	}
+	if (m_SolidRectGaugeShader != 0)
+	{
+		glDeleteShader(m_SolidRectGaugeShader);
+	}
+	if (m_SolidRectXYShader != 0)
+	{
+		glDeleteShader(m_SolidRectXYShader);
+	}
+	if (m_SolidRectWithTextureShader != 0)
+	{
+		glDeleteShader(m_SolidRectWithTextureShader);
+	}
+	if (m_SolidRectWithTextureSeqShader != 0)
+	{
+		glDeleteShader(m_SolidRectWithTextureSeqShader);
+	}
+	if (m_ParticleWithTextureShader != 0)
+	{
+		glDeleteShader(m_ParticleWithTextureShader);
+	}
+
+	for (int i=0; i<MAX_TEXTURES; i++)
+	{
+		if (m_textureList[i] != 0)
+		{
+			glDeleteTextures(1, &m_textureList[i]);
+			m_textureList[i] = 0;
+		}
+	}
 }
 
 void Renderer::Initialize(int windowSizeX, int windowSizeY)
@@ -25,7 +80,7 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	m_SolidRectWithTextureShader = CompileShaders("./Shaders/SolidRectWithTexture.vs", "./Shaders/SolidRectWithTexture.fs");
 	m_SolidRectWithTextureSeqShader = CompileShaders("./Shaders/SolidRectWithTextureSeq.vs", "./Shaders/SolidRectWithTextureSeq.fs");
 	m_ParticleWithTextureShader = CompileShaders("./Shaders/Particle.vs", "./Shaders/Particle.fs");
-
+	
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -36,6 +91,11 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	{
 		m_Initialized = true;
 	}
+
+	for (int i = 0; i < MAX_TEXTURES; i++)
+	{
+		m_textureList[i] = 0;
+	}
 }
 
 bool Renderer::IsInitialized()
@@ -45,7 +105,6 @@ bool Renderer::IsInitialized()
 
 GLuint Renderer::CreatePngTexture(char * filePath)
 {
-
 	GLuint temp;
 	glGenTextures(1, &temp);
 
@@ -60,12 +119,55 @@ GLuint Renderer::CreatePngTexture(char * filePath)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &image[0]);
 
-	return temp;
+	GLuint index = 0;
+	for (GLuint i = 0; i < MAX_TEXTURES; i++)
+	{
+		if (m_textureList[i] == 0)
+		{
+			m_textureList[i] = temp;
+			index = i;
+			break;
+		}
+	}
+
+	return index;
+}
+
+GLuint Renderer::CreateBmpTexture(char * filePath)
+{
+	unsigned int width, height;
+
+	unsigned char* rawImage = loadBMPRaw(filePath, width, height, false);
+
+	GLuint temp;
+	glGenTextures(1, &temp);
+
+	glBindTexture(GL_TEXTURE_2D, temp);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, &rawImage[0]);
+
+	GLuint index = 0;
+	for (GLuint i = 0; i < MAX_TEXTURES; i++)
+	{
+		if (m_textureList[i] == 0)
+		{
+			m_textureList[i] = temp;
+			index = i;
+			break;
+		}
+	}
+
+	return index;
 }
 
 void Renderer::DeleteTexture(GLuint textureID)
 {
-	glDeleteTextures(1, &textureID);
+	if (m_textureList[textureID] != 0)
+	{
+		glDeleteTextures(1, &m_textureList[textureID]);
+		m_textureList[textureID] = 0;
+	}	
 }
 
 void Renderer::CreateVertexBufferObjects()
@@ -73,12 +175,12 @@ void Renderer::CreateVertexBufferObjects()
 	float rect[]
 		=
 	{
-		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, 
 		-1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f,
-		1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
-		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,
-		1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f,
-		1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
+		 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, //Triangle1
+		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, 
+		 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f,
+		 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, //Triangle2
 	};
 
 	glGenBuffers(1, &m_VBORect);
@@ -90,10 +192,10 @@ void Renderer::CreateVertexBufferObjects()
 	{
 		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, 0.f, 0.f,
 		-1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 0.f, 1.f,
-		1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f, 1.f,        //Triangle1
+		 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f, 1.f,        //Triangle1
 		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, 0.f, 0.f,
-		1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f, 1.f,
-		1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, 1.f, 0.f,        //Triangle2
+		 1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 1.f, 1.f,
+		 1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f, 1.f, 0.f,        //Triangle2
 	};
 
 	glGenBuffers(1, &m_VBORectTex);
@@ -105,7 +207,7 @@ void Renderer::CreateVertexBufferObjects()
 	{
 		-1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,
 		-1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f,
-		1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f,
+		1.f / m_WindowSizeX, 1.f / m_WindowSizeY, 0.f, 
 		1.f / m_WindowSizeX, -1.f / m_WindowSizeY, 0.f,
 	};
 
@@ -144,7 +246,7 @@ void Renderer::CreateParticleVBO()
 		randomStartTime = (rand() / (float)RAND_MAX)*20.f;
 		randomSize = (rand() / (float)RAND_MAX)*3.f;
 
-		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX;
+		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosX; 
 		particleVertices[particleVertIndex] *= randomSize;
 		particleVertIndex++;
 		particleVertices[particleVertIndex] = -particleSize / 2.f + particleInitPosY;
@@ -278,7 +380,7 @@ void Renderer::CreateParticleVBO()
 
 void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType)
 {
-	//ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½
+	//½¦ÀÌ´õ ¿ÀºêÁ§Æ® »ý¼º
 	GLuint ShaderObj = glCreateShader(ShaderType);
 
 	if (ShaderObj == 0) {
@@ -289,25 +391,25 @@ void Renderer::AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum S
 	p[0] = pShaderText;
 	GLint Lengths[1];
 	Lengths[0] = strlen(pShaderText);
-	//ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ï¿½ ï¿½Ò´ï¿½
+	//½¦ÀÌ´õ ÄÚµå¸¦ ½¦ÀÌ´õ ¿ÀºêÁ§Æ®¿¡ ÇÒ´ç
 	glShaderSource(ShaderObj, 1, p, Lengths);
 
-	//ï¿½Ò´ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½Úµå¸¦ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	//ÇÒ´çµÈ ½¦ÀÌ´õ ÄÚµå¸¦ ÄÄÆÄÀÏ
 	glCompileShader(ShaderObj);
 
 	GLint success;
-	// ShaderObj ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ç¾ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+	// ShaderObj °¡ ¼º°øÀûÀ¸·Î ÄÄÆÄÀÏ µÇ¾ú´ÂÁö È®ÀÎ
 	glGetShaderiv(ShaderObj, GL_COMPILE_STATUS, &success);
 	if (!success) {
 		GLchar InfoLog[1024];
 
-		//OpenGL ï¿½ï¿½ shader log ï¿½ï¿½ï¿½ï¿½ï¿½Í¸ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		//OpenGL ÀÇ shader log µ¥ÀÌÅÍ¸¦ °¡Á®¿È
 		glGetShaderInfoLog(ShaderObj, 1024, NULL, InfoLog);
 		fprintf(stderr, "Error compiling shader type %d: '%s'\n", ShaderType, InfoLog);
 		printf("%s \n", pShaderText);
 	}
 
-	// ShaderProgram ï¿½ï¿½ attach!!
+	// ShaderProgram ¿¡ attach!!
 	glAttachShader(ShaderProgram, ShaderObj);
 }
 
@@ -330,43 +432,43 @@ bool Renderer::ReadFile(char* filename, std::string *target)
 
 GLuint Renderer::CompileShaders(char* filenameVS, char* filenameFS)
 {
-	GLuint ShaderProgram = glCreateProgram(); //ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½Î±×·ï¿½ ï¿½ï¿½ï¿½ï¿½
+	GLuint ShaderProgram = glCreateProgram(); //ºó ½¦ÀÌ´õ ÇÁ·Î±×·¥ »ý¼º
 
-	if (ShaderProgram == 0) { //ï¿½ï¿½ï¿½Ì´ï¿½ ï¿½ï¿½ï¿½Î±×·ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+	if (ShaderProgram == 0) { //½¦ÀÌ´õ ÇÁ·Î±×·¥ÀÌ ¸¸µé¾îÁ³´ÂÁö È®ÀÎ
 		fprintf(stderr, "Error creating shader program\n");
 	}
 
 	std::string vs, fs;
 
-	//shader.vs ï¿½ï¿½ vs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½
+	//shader.vs °¡ vs ¾ÈÀ¸·Î ·ÎµùµÊ
 	if (!ReadFile(filenameVS, &vs)) {
 		printf("Error compiling vertex shader\n");
 		return -1;
 	};
 
-	//shader.fs ï¿½ï¿½ fs ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Îµï¿½ï¿½ï¿½
+	//shader.fs °¡ fs ¾ÈÀ¸·Î ·ÎµùµÊ
 	if (!ReadFile(filenameFS, &fs)) {
 		printf("Error compiling fragment shader\n");
 		return -1;
 	};
 
-	// ShaderProgram ï¿½ï¿½ vs.c_str() ï¿½ï¿½ï¿½Ø½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ attachï¿½ï¿½
+	// ShaderProgram ¿¡ vs.c_str() ¹öÅØ½º ½¦ÀÌ´õ¸¦ ÄÄÆÄÀÏÇÑ °á°ú¸¦ attachÇÔ
 	AddShader(ShaderProgram, vs.c_str(), GL_VERTEX_SHADER);
 
-	// ShaderProgram ï¿½ï¿½ fs.c_str() ï¿½ï¿½ï¿½ï¿½ï¿½×¸ï¿½Æ® ï¿½ï¿½ï¿½Ì´ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ attachï¿½ï¿½
+	// ShaderProgram ¿¡ fs.c_str() ÇÁ·¹±×¸ÕÆ® ½¦ÀÌ´õ¸¦ ÄÄÆÄÀÏÇÑ °á°ú¸¦ attachÇÔ
 	AddShader(ShaderProgram, fs.c_str(), GL_FRAGMENT_SHADER);
 
 	GLint Success = 0;
 	GLchar ErrorLog[1024] = { 0 };
 
-	//Attach ï¿½Ï·ï¿½ï¿½ shaderProgram ï¿½ï¿½ ï¿½ï¿½Å·ï¿½ï¿½
+	//Attach ¿Ï·áµÈ shaderProgram À» ¸µÅ·ÇÔ
 	glLinkProgram(ShaderProgram);
 
-	//ï¿½ï¿½Å©ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ß´ï¿½ï¿½ï¿½ È®ï¿½ï¿½
+	//¸µÅ©°¡ ¼º°øÇß´ÂÁö È®ÀÎ
 	glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &Success);
 
 	if (Success == 0) {
-		// shader program ï¿½Î±×¸ï¿½ ï¿½Þ¾Æ¿ï¿½
+		// shader program ·Î±×¸¦ ¹Þ¾Æ¿È
 		glGetProgramInfoLog(ShaderProgram, sizeof(ErrorLog), NULL, ErrorLog);
 		std::cout << filenameVS << ", " << filenameFS << " Error linking shader program\n" << ErrorLog;
 		return -1;
@@ -401,14 +503,12 @@ void Renderer::DrawSolidRect(float x, float y, float z, float size, float r, flo
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
-	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, 0, size);
+	glDepthFunc(GL_LEQUAL);
+	
+	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, size*m_sceneScaleX, size*m_sceneScaleY);
 	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
 	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
-
-
-
+		
 	int attribPosition = glGetAttribLocation(shader, "a_Position");
 	glEnableVertexAttribArray(attribPosition);
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORect);
@@ -434,9 +534,9 @@ void Renderer::DrawSolidRectXY(float x, float y, float z, float width, float hei
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 
-	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, width, height);
+	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, width*m_sceneScaleX, height*m_sceneScaleY);
 	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
 	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
 
@@ -467,14 +567,14 @@ void Renderer::DrawSolidRectGauge(float x, float y, float z, float width, float 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 
 	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
 	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
 	GLuint u_Gauge = glGetUniformLocation(shader, "u_Gauge");
 	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
 
-	glUniform4f(u_Trans, newX, newY, width, height);
+	glUniform4f(u_Trans, newX, newY, width*m_sceneScaleX, height*m_sceneScaleY);
 	glUniform4f(u_Color, r, g, b, a);
 	glUniform1f(u_Gauge, gauge);
 
@@ -486,7 +586,7 @@ void Renderer::DrawSolidRectGauge(float x, float y, float z, float width, float 
 	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectTex);
 	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
 	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
-
+	
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	glDisableVertexAttribArray(attribPosition);
@@ -508,9 +608,9 @@ void Renderer::DrawBorderXY(float x, float y, float z, float width, float height
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 
-	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, width, height);
+	glUniform4f(glGetUniformLocation(shader, "u_Trans"), newX, newY, width*m_sceneScaleX, height*m_sceneScaleY);
 	glUniform4f(glGetUniformLocation(shader, "u_Color"), r, g, b, a);
 	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
 
@@ -526,6 +626,8 @@ void Renderer::DrawBorderXY(float x, float y, float z, float width, float height
 
 void Renderer::DrawTexturedRect(float x, float y, float z, float size, float r, float g, float b, float a, GLuint texID, float level)
 {
+	GLuint tID = m_textureList[texID];
+
 	float newX, newY;
 
 	GetGLPosition(x, y, &newX, &newY);
@@ -539,13 +641,13 @@ void Renderer::DrawTexturedRect(float x, float y, float z, float size, float r, 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 
 	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
 	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
 	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
 
-	glUniform4f(u_Trans, newX, newY, 0, size);
+	glUniform4f(u_Trans, newX, newY, size*m_sceneScaleX, size*m_sceneScaleY);
 	glUniform4f(u_Color, r, g, b, a);
 
 	GLuint attribPosition = glGetAttribLocation(shader, "a_Position");
@@ -558,7 +660,7 @@ void Renderer::DrawTexturedRect(float x, float y, float z, float size, float r, 
 	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texID);
+	glBindTexture(GL_TEXTURE_2D, tID);
 	GLuint u_Texture = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(u_Texture, 0);
 
@@ -570,6 +672,8 @@ void Renderer::DrawTexturedRect(float x, float y, float z, float size, float r, 
 
 void Renderer::DrawTexturedRectSeq(float x, float y, float z, float size, float r, float g, float b, float a, GLuint texID, int currSeqX, int currSeqY, int totalSeqX, int totalSeqY, float level)
 {
+	GLuint tID = m_textureList[texID];
+
 	float newX, newY;
 
 	GetGLPosition(x, y, &newX, &newY);
@@ -583,7 +687,7 @@ void Renderer::DrawTexturedRectSeq(float x, float y, float z, float size, float 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
+	glDepthFunc(GL_LEQUAL);
 
 	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
 	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
@@ -593,7 +697,7 @@ void Renderer::DrawTexturedRectSeq(float x, float y, float z, float size, float 
 	GLuint u_CurrSeqY = glGetUniformLocation(shader, "u_CurrSeqY");
 	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
 
-	glUniform4f(u_Trans, newX, newY, 0, size);
+	glUniform4f(u_Trans, newX, newY, size*m_sceneScaleX, size*m_sceneScaleY);
 	glUniform4f(u_Color, r, g, b, a);
 	glUniform1f(u_TotalSeqX, (float)totalSeqX);
 	glUniform1f(u_CurrSeqX, (float)currSeqX);
@@ -610,7 +714,107 @@ void Renderer::DrawTexturedRectSeq(float x, float y, float z, float size, float 
 	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texID);
+	glBindTexture(GL_TEXTURE_2D, tID);
+	GLuint u_Texture = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(u_Texture, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTexPosition);
+}
+
+void Renderer::DrawTexturedRectXY(float x, float y, float z, float width, float height, float r, float g, float b, float a, GLuint texID, float level)
+{
+	GLuint tID = m_textureList[texID];
+
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_SolidRectWithTextureShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
+	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
+
+	glUniform4f(u_Trans, newX, newY, width*m_sceneScaleX, height*m_sceneScaleY);
+	glUniform4f(u_Color, r, g, b, a);
+
+	GLuint attribPosition = glGetAttribLocation(shader, "a_Position");
+	GLuint attribTexPosition = glGetAttribLocation(shader, "a_TexPosition");
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectTex);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tID);
+	GLuint u_Texture = glGetUniformLocation(shader, "u_Texture");
+	glUniform1i(u_Texture, 0);
+
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(attribPosition);
+	glDisableVertexAttribArray(attribTexPosition);
+}
+
+void Renderer::DrawTexturedRectSeqXY(float x, float y, float z, float width, float height, float r, float g, float b, float a, GLuint texID, int currSeqX, int currSeqY, int totalSeqX, int totalSeqY, float level)
+{
+	GLuint tID = m_textureList[texID];
+
+	float newX, newY;
+
+	GetGLPosition(x, y, &newX, &newY);
+
+	GLuint shader = m_SolidRectWithTextureSeqShader;
+
+	//Program select
+	glUseProgram(shader);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+
+	GLuint u_Trans = glGetUniformLocation(shader, "u_Trans");
+	GLuint u_Color = glGetUniformLocation(shader, "u_Color");
+	GLuint u_TotalSeqX = glGetUniformLocation(shader, "u_TotalSeqX");
+	GLuint u_TotalSeqY = glGetUniformLocation(shader, "u_TotalSeqY");
+	GLuint u_CurrSeqX = glGetUniformLocation(shader, "u_CurrSeqX");
+	GLuint u_CurrSeqY = glGetUniformLocation(shader, "u_CurrSeqY");
+	glUniform1f(glGetUniformLocation(shader, "u_Depth"), level);
+
+	glUniform4f(u_Trans, newX, newY, width*m_sceneScaleX, height*m_sceneScaleY);
+	glUniform4f(u_Color, r, g, b, a);
+	glUniform1f(u_TotalSeqX, (float)totalSeqX);
+	glUniform1f(u_CurrSeqX, (float)currSeqX);
+	glUniform1f(u_TotalSeqY, (float)totalSeqY);
+	glUniform1f(u_CurrSeqY, (float)currSeqY);
+
+	GLuint attribPosition = glGetAttribLocation(shader, "a_Position");
+	GLuint attribTexPosition = glGetAttribLocation(shader, "a_TexPosition");
+	glEnableVertexAttribArray(attribPosition);
+	glEnableVertexAttribArray(attribTexPosition);
+
+	glBindBuffer(GL_ARRAY_BUFFER, m_VBORectTex);
+	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(attribTexPosition, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, tID);
 	GLuint u_Texture = glGetUniformLocation(shader, "u_Texture");
 	glUniform1i(u_Texture, 0);
 
@@ -622,6 +826,8 @@ void Renderer::DrawTexturedRectSeq(float x, float y, float z, float size, float 
 
 void Renderer::DrawParticle(float x, float y, float z, float size, float r, float g, float b, float a, float gDirX, float gDirY, GLuint texID, float timeInSeconds)
 {
+	GLuint tID = m_textureList[texID];
+
 	float newX, newY;
 
 	GetGLPosition(x, y, &newX, &newY);
@@ -658,12 +864,12 @@ void Renderer::DrawParticle(float x, float y, float z, float size, float r, floa
 
 	glUniform1f(uniformElapsedTime, timeInSeconds);
 	glUniform1i(uniformTexture, 0);
-	glUniform4f(u_Trans, newX, newY, 0, size);
+	glUniform4f(u_Trans, newX, newY, size*m_sceneScaleX, size*m_sceneScaleY);
 	glUniform4f(u_Color, r, g, b, a);
 	glUniform3f(u_TrailDir, gDirX, gDirY, 0);
 
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texID);
+	glBindTexture(GL_TEXTURE_2D, tID);
 
 	glDrawArrays(GL_TRIANGLES, 0, m_ParticleVertexCount);
 
@@ -672,13 +878,33 @@ void Renderer::DrawParticle(float x, float y, float z, float size, float r, floa
 	glDisableVertexAttribArray(attribVelocity);
 }
 
-void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
+void Renderer::DrawText(float x, float y, void* font, float r, float g, float b, char* text)
 {
-	*newX = x * 2.f / m_WindowSizeX;
-	*newY = y * 2.f / m_WindowSizeY;
+	glUseProgram(0);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+	glWindowPos2i(x+m_WindowSizeX/2, y+m_WindowSizeY/2);
+	glColor3f(r, g, b);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glutBitmapString(GLUT_BITMAP_HELVETICA_10, (unsigned char*)text);
 }
 
-unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight, bool flipY)
+void Renderer::GetGLPosition(float x, float y, float *newX, float *newY)
+{
+	*newX = x * 2.f / m_WindowSizeX + m_sceneTransX;
+	*newY = y * 2.f / m_WindowSizeY + m_sceneTransY;
+}
+
+void Renderer::SetSceneTransform(float x, float y, float scaleX, float scaleY)
+{
+	m_sceneTransX = x / m_WindowSizeX;
+	m_sceneTransY = y / m_WindowSizeY;
+	m_sceneScaleX = scaleX;
+	m_sceneScaleY = scaleY;
+}
+
+unsigned char * Renderer::loadBMPRaw(const char * imagepath, unsigned int& outWidth, unsigned int& outHeight, bool flipY) 
 {
 	printf("Reading image %s\n", imagepath);
 	outWidth = -1;

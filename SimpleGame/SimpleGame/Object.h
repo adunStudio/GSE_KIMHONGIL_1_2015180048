@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "define.h"
 #include <vector>
+#include <string>
 
 using namespace std;
 

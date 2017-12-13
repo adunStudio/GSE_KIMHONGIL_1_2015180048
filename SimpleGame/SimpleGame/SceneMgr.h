@@ -3,6 +3,7 @@
 #include "define.h"
 #include "Object.h"
 #include "Renderer.h"
+#include "Sound.h"
 #include <iostream>
 #include <vector>
 #include <memory>

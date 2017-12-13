@@ -25,6 +25,15 @@ void SceneMgr::init()
 	addBuildingObject(150, -300, BLUE_TEAM);
 
 	background = new Object(0, 0, OBJECT_BACKGROUND, 0);
+
+	auto m_sound = new Sound();
+
+	auto soundBG = m_sound->CreateSound("./Dependencies/SoundSamples/MF-W-90.XM");
+
+	m_sound->PlaySound(soundBG, true, 0.2f);
+
+
+	
 }
 
 void SceneMgr::addBuildingObject(float x, float y, int team)
