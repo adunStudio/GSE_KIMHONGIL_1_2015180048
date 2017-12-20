@@ -32,6 +32,9 @@ void SceneMgr::init()
 
 	m_sound->PlaySound(soundBG, true, 0.2f);
 
+	snowTexture = renderer->CreatePngTexture("./resource/snow.png");
+
+
 
 	
 }
@@ -276,4 +279,6 @@ void SceneMgr::render()
 		v->render(renderer);
 	for (auto v : blue_arrows)
 		v->render(renderer);
+
+	renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1, -0.1, snowTexture, curTime, LEVEL_SNOW);
 }

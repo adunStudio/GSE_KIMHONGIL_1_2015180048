@@ -27,6 +27,7 @@ private:
 	vector<Object*> blue_arrows;
 
 	Object* background = nullptr;
+	int snowTexture = -1;
 
 	void init();
 	void addBuildingObject(float x, float y, int team);

@@ -171,7 +171,7 @@ void Object::render(Renderer* renderer)
 	case OBJECT_BULLET:
 		if (texture < 0)
 			texture = renderer->CreatePngTexture("./resource/particle.png");
-		renderer->DrawParticle(x, y, 0, size, 1, 1, 1, 1, -1 * speedX / abs(speedX) * cos(angle),  -1 * speedY / abs(speedY) * sin(angle), texture, elapsedTime);
+		renderer->DrawParticle(x, y, 0, size, 1, 1, 1, 1, -1 * speedX / abs(speedX) * cos(angle),  -1 * speedY / abs(speedY) * sin(angle), texture, elapsedTime, LEVEL_BULLET);
 
 		break;
 

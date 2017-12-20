@@ -15,6 +15,8 @@
 #define LEVEL_BULLET     0.4
 #define LEVEL_ARROW      0.5
 #define LEVEL_BACKGROUND 0.9
+#define LEVEL_SNOW       0.1
+
 
 #define RED_TEAM         1
 #define BLUE_TEAM        2
