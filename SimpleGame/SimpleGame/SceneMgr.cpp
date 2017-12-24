@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "SceneMgr.h"
 
-SceneMgr::SceneMgr(Renderer* _renderer) : renderer(_renderer), curTime(0), prevTime(0)
+SceneMgr::SceneMgr(Renderer* _renderer) : renderer(_renderer), curTime(0), prevTime(0), shakeTime(1)
 {
 	prevTime = static_cast<float>(timeGetTime() * 0.001f);
 
@@ -28,11 +28,17 @@ void SceneMgr::init()
 
 	auto m_sound = new Sound();
 
-	auto soundBG = m_sound->CreateSound("./Dependencies/SoundSamples/MF-W-90.XM");
+	auto soundBG = m_sound->CreateSound("./resource/Christmas.mp3");
 
 	m_sound->PlaySound(soundBG, true, 0.2f);
 
-	snowTexture = renderer->CreatePngTexture("./resource/snow.png");
+	textures.push_back(renderer->CreatePngTexture("./resource/ch/ch_candy.png"));
+	textures.push_back(renderer->CreatePngTexture("./resource/ch/ch_deer.png"));
+	textures.push_back(renderer->CreatePngTexture("./resource/ch/ch_gift.png"));
+	textures.push_back(renderer->CreatePngTexture("./resource/ch/ch_santa.png"));
+	textures.push_back(renderer->CreatePngTexture("./resource/ch/ch_snow.png"));
+
+	xmax_texture = renderer->CreatePngTexture("./resource/christmas.png");
 
 
 
@@ -97,6 +103,20 @@ void SceneMgr::update()
 
 	red_time  += elapsed;
 	blue_time += elapsed;
+	shakeTime += elapsed;
+
+
+
+	if (shakeTime <= 0.5)
+	{
+		renderer->SetSceneTransform(-3 + rand() % 7, -3 + rand() % 7, 1, 1);
+		renderer->DrawTexturedRect(0, 0, 0, 300, 1, 1, 1, 1, xmax_texture, LEVEL_XMAS);
+
+	}
+	else
+	{
+		renderer->SetSceneTransform(0, 0, 1, 1);
+	}
 
 	for (auto v : red_buildings)
 		v->update(elapsed);
@@ -207,6 +227,9 @@ void SceneMgr::iterateCollision(vector<Object*>& team1V, vector<Object*>& team2V
 				obj1->attacked(obj2_life);
 				obj2->attacked(obj1_life);
 
+				if (obj1->type == OBJECT_CHARACTER || obj2->type == OBJECT_CHARACTER)
+					shakeTime = 0;
+
 				if (obj1->getLife() <= 0);
 				{
 					delete obj1;
@@ -280,5 +303,11 @@ void SceneMgr::render()
 	for (auto v : blue_arrows)
 		v->render(renderer);
 
-	renderer->DrawParticleClimate(0, 0, 0, 1, 1, 1, 1, 1, -0.1, -0.1, snowTexture, curTime, LEVEL_SNOW);
+	renderer->DrawParticleClimate(0, 0, 0, 2, 1, 1, 1, 1, -0.11, -0.11, textures[4], curTime, LEVEL_SNOW);
+	renderer->DrawParticleClimate(17, -33, 0, 2, 1, 1, 1, 1, -0.45, -0.31, textures[3], curTime, LEVEL_SNOW);
+
+
+
+
+
 }

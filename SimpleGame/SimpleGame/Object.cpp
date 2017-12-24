@@ -15,7 +15,17 @@ Object::~Object()
 
 void Object::init()
 {
-	angle = rand() % 360;
+	switch (team)
+	{
+	case RED_TEAM:
+		angle = 180 + rand() % 180;
+
+		break;
+	case BLUE_TEAM:
+		angle = rand() % 180;
+
+		break;
+	}
 	lifeTime = 100;
 
 	switch (type)
@@ -121,14 +131,37 @@ bool Object::isDead()
 
 void Object::update(float elapsed)
 {
+	aa++;
+
+	if (aa > 360)
+		aa = 0;
+
 	elapsedTime += elapsed;	
 	frameTime += elapsed;
 	lifeTime -= elapsed;
 
-	if (frameTime > 0.2)
+	
+	if (type == OBJECT_BUILDING)
 	{
-		frame = (frame + 1) % 4;
-		frameTime = 0;
+		if (frameTime >((double)rand() / (RAND_MAX)) + 1)
+		{
+			frame = (frame + 1) % 5;
+			frameTime = 0;
+
+			if(frame == 1)
+				frameY = (frameY + 1) % 4;
+		}
+
+	}
+	else
+	{
+		if (frameTime > 0.2)
+		{
+			frame = (frame + 1) % 4;
+			frameTime = 0;
+
+		}
+
 	}
 
 	if (type == OBJECT_CHARACTER)
@@ -143,10 +176,19 @@ void Object::update(float elapsed)
 	{
 
 	}
+	x += cos(angle * PI / 180.0f) * speedX * 0.0005;
+	y += sin(angle * PI / 180.0f) * speedY * 0.0005;
+	/**if (type == OBJECT_CHARACTER)
+	{
+	
+	}
+	else
+	{
+		x += cos(angle) * speedX * 0.0005;
+		y += sin(angle) * speedY * 0.0005;
+	}**/
 	
 	
-	x += cos(angle) * speedX * 0.0005;
-	y += sin(angle) * speedY * 0.0005;
 }
 
 void Object::render(Renderer* renderer)
@@ -163,15 +205,36 @@ void Object::render(Renderer* renderer)
 
 	case OBJECT_CHARACTER:
 		if (texture < 0)
-			texture = renderer->CreatePngTexture("./resource/slime.png");
+		{
+			switch (team)
+			{
+			case RED_TEAM:
+				texture = renderer->CreatePngTexture("./resource/skeleton.png");
+				break;
+			case BLUE_TEAM:
+				texture = renderer->CreatePngTexture("./resource/santa.png");
 
-		renderer->DrawTexturedRectSeq(x,  y, 0, size, 1, 1, 1, 1, texture, frame, 0, 4, 1, m_drawLevel);
+				bb = renderer->CreatePngTexture("./resource/ch/ch_gift.png");
+
+			}
+		}
+
+		if(team == RED_TEAM)
+			renderer->DrawTexturedRectSeq(x,  y, 0, size, 1, 1, 1, 1, texture, frame, 0, 4, 1, m_drawLevel);
+		else
+		{
+			renderer->DrawTexturedRectSeq(x, y, 0, size, 1, 1, 1, 1, texture, frame, 0, 8, 1, m_drawLevel);
+
+			renderer->DrawTexturedRect(cos(aa * PI / 180.0f) + x + 15, sin(aa * PI / 180.0f) + y + 15, 0, 30, 1, 1, 1, 1, bb, m_drawLevel);
+
+		}
+
 		break;
 
 	case OBJECT_BULLET:
 		if (texture < 0)
-			texture = renderer->CreatePngTexture("./resource/particle.png");
-		renderer->DrawParticle(x, y, 0, size, 1, 1, 1, 1, -1 * speedX / abs(speedX) * cos(angle),  -1 * speedY / abs(speedY) * sin(angle), texture, elapsedTime, LEVEL_BULLET);
+			texture = renderer->CreatePngTexture("./resource/candy.png");
+		renderer->DrawParticle(x, y, 0, size, 1, 1, 1, 1, -1 * speedX / abs(speedX) * cos(angle * PI / 180.0f),  -1 * speedY / abs(speedY) * sin(angle  * PI / 180.0f), texture, elapsedTime, LEVEL_BULLET);
 
 		break;
 
@@ -181,21 +244,41 @@ void Object::render(Renderer* renderer)
 			switch (team)
 			{
 			case RED_TEAM:
-				texture = renderer->CreatePngTexture("./resource/red_team2.png");
+				texture = renderer->CreatePngTexture("./resource/tree.png");
 				break;
 
 			case BLUE_TEAM:
-				texture = renderer->CreatePngTexture("./resource/blue_team.png");
+				texture = renderer->CreatePngTexture("./resource/tree.png");
 				break;
 			}
 		}
 
-		renderer->DrawTexturedRect(x, y, 0, size, 1, 1, 1, 1, texture, m_drawLevel);
-		char text[10];
-		_itoa_s(life, text, 10);
-		renderer->DrawText(x-10, y, GLUT_BITMAP_TIMES_ROMAN_10, 1, 1, 0, text);
+		//renderer->DrawTexturedRectSeq(x, y, 0, size, 1, 1, 1, 1, texture, frame, 0, 4, 1, m_drawLevel);
+		renderer->DrawTexturedRectSeqXY(x, y, 0, size, size, 1, 1, 1, 1, texture, frame, frameY, 5, 3, m_drawLevel);
+		//renderer->DrawTexturedRect(x, y, 0, size, 1, 1, 1, 1, texture, m_drawLevel);
+	
 		break;
 		
+	case OBJECT_ARROW:
+		if (texture < 0)
+		{
+			switch (team)
+			{
+			case RED_TEAM:
+				texture = renderer->CreatePngTexture("./resource/particle.png");
+				break;
+
+			case BLUE_TEAM:
+				texture = renderer->CreatePngTexture("./resource/ch/ch_gift.png");
+
+				break;
+			}
+		}
+
+		renderer->DrawTexturedRect(x, y, 0, size + 10, 1, 1, 1, 1, texture, m_drawLevel);
+		break;
+
+
 	default:
 		renderer->DrawSolidRect(x, y, z, size, r, g, b, a, m_drawLevel);
 
@@ -209,6 +292,13 @@ void Object::render(Renderer* renderer)
 			renderer->DrawSolidRectGauge(x, y + 10 + (size / 2), z, size, 10, 1, 0, 0, 1, life / m_maxLife, m_drawLevel);
 		else
 			renderer->DrawSolidRectGauge(x, y + 10 + (size / 2), z, size, 10, 0, 0, 1, 1, life / m_maxLife, m_drawLevel);
+
+		if (type == OBJECT_BUILDING)
+		{
+			char text[10];
+			_itoa_s(life, text, 10);
+			renderer->DrawText(x - 10, y + 56, GLUT_BITMAP_TIMES_ROMAN_10, 1, 1, 0, text);
+		}
 	}
 
 }

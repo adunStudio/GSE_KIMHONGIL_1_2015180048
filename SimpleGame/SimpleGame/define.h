@@ -16,6 +16,7 @@
 #define LEVEL_ARROW      0.5
 #define LEVEL_BACKGROUND 0.9
 #define LEVEL_SNOW       0.1
+#define LEVEL_XMAS       0
 
 
 #define RED_TEAM         1
@@ -24,7 +25,10 @@
 #define BULLET_COOLTIME  5
 
 #define RED_CHARACTER_COOLTIME   5
-#define BLUE_CHARACTER_COOLTIME  7
+#define BLUE_CHARACTER_COOLTIME  4
 
-#define ARROW_COOLTIME 3
+#define ARROW_COOLTIME 2
+
+#define PI 3.14159265
+
 

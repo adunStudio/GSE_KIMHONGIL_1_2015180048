@@ -27,7 +27,10 @@ private:
 	vector<Object*> blue_arrows;
 
 	Object* background = nullptr;
-	int snowTexture = -1;
+	
+	vector<int> textures;
+
+	int xmax_texture = -1;
 
 	void init();
 	void addBuildingObject(float x, float y, int team);
@@ -38,7 +41,7 @@ private:
 
 	bool collision(Object* obj1, Object* obj2);
 
-	float curTime, prevTime;
+	float curTime, prevTime, shakeTime;
 
 public:
 	SceneMgr(Renderer* _renderer);

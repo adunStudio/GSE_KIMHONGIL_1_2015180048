@@ -15,10 +15,12 @@ struct Color
 
 class Object
 {
+public:
+	int type;
+
 private:
 	float x, y, z;
 	float size;
-	int type;
 	float r, g, b, a;
 	float speedX, speedY;
 	float m_maxLife = 0;
@@ -29,7 +31,10 @@ private:
 	int texture = -1;
 	float m_drawLevel = 0;
 	int frame = 0;
+	int frameY = 0;
 	float frameTime = 0;
+	int aa = 0;
+	int bb = 0;
 
 	Object* parent = nullptr;
 	vector<Object*> children;
